@@ -1,13 +1,24 @@
+// Imports React hooks
+// Lets you store data, lets you run code when the component loads
 import { useState, useEffect } from "react"
+// imports css module for styling
 import styles from "../styles/counterstrike.module.css"
+//Imports all charts for Recharts
 import { LineChart, Line, ScatterChart, Scatter, ZAxis, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
 
+// React component. export default means it can be imported
 export default function CS2() {
+  // stores the data from leetify API. defaults as null
   const [data, setData] = useState(null)
+  // stores any errors if a fetch fails
   const [error, setError] = useState(null)
+  // stores the match data from leetify/matches endpoint
   const [matchesData, setMatchesData] = useState(null)
+  // tracks which view is currently active "overview" "recent" or "map" starts on overview
   const [view, setView] = useState("overview")
 
+  // when page loads fetches mathc history from node & saves it to matches data
+  // empty [] means it only runs once
   useEffect(() => {
     fetch("/leetify/matches")
       .then(r => r.json())
@@ -15,6 +26,8 @@ export default function CS2() {
       .catch(() => setError("Failed to load matches"))
   }, [])
 
+  // when page loads fetches match history from node & saves it to data
+  // empty [] means it only runs once
   useEffect(() => {
     fetch("/leetify")
       .then(r => r.json())
@@ -22,6 +35,9 @@ export default function CS2() {
       .catch(() => setError("Failed to load data"))
   }, [])
 
+  // Takes the 30 most recent matches and extracts your personal stats
+  // finds your stats specificially since each match contains mulitple players 
+  // returns array of onjects one entry per match used by charts
   const myStats = matchesData?.slice(0, 30).map((match, i) => {
     const me = match.stats?.find(p => p.steam64_id === "76561198190351278")
     return {
@@ -36,6 +52,8 @@ export default function CS2() {
     }
   })
 
+  // groups reaction time data from recent_matches api
+  // recent_matches api uses miliseconds rather than seconds
   const recentByMap = (data?.recent_matches ?? []).reduce((acc, match) => {
     const map = match.map_name?.replace("de_", "").replace("cs_", "")
     if (!acc[map]) acc[map] = []
@@ -43,15 +61,23 @@ export default function CS2() {
     return acc
   }, {})
 
+  // Only runs if matchesData has loaded
+  // reduce looops through every match and groups them by map name
   const mapStats = matchesData ? Object.values(
     matchesData.reduce((acc, match) => {
+      // Finds your specific stats
+      // if stats are not found it does not use the match
       const me = match.stats?.find(p => p.steam64_id === "76561198190351278")
       if (!me) return acc
       const map = match.map_name
+      // changes de_mirage to just mirage
       const mapShort = map.replace("de_", "").replace("cs_", "")
+      // if map was not played before, creates new entry with empy arrays of each stat
       if (!acc[mapShort]) {
         acc[mapShort] = { map: mapShort, kd: [], dpr: [], hs_kills: [], trade_kill: [], preaim: [], count: 0 }
       }
+      // adds different stats to array where stats are held
+      // uses 0 if there is no stat found
       acc[mapShort].kd.push(me.kd_ratio ?? 0)
       acc[mapShort].dpr.push(me.dpr ?? 0)
       acc[mapShort].hs_kills.push(me.total_hs_kills ?? 0)
@@ -60,6 +86,9 @@ export default function CS2() {
       acc[mapShort].count++
       return acc
     }, {})
+
+    // affter grouping by map, averages for each stat
+    // rounds to 2 decimal places
   ).map(m => ({
     map: m.map,
     kd: (m.kd.reduce((a, b) => a + b, 0) / m.kd.length).toFixed(2),
@@ -67,25 +96,38 @@ export default function CS2() {
     hs_kills: (m.hs_kills.reduce((a, b) => a + b, 0) / m.hs_kills.length).toFixed(1),
     trade_kill: ((m.trade_kill.reduce((a, b) => a + b, 0) / m.trade_kill.length) * 100).toFixed(1),
     preaim: (m.preaim.reduce((a, b) => a + b, 0) / m.preaim.length).toFixed(1),
+    // uses recentByMap from regular leetify api instead of matches api
+    // returns null if no data exists
     reaction_time: recentByMap[m.map]
       ? (recentByMap[m.map].reduce((a, b) => a + b, 0) / recentByMap[m.map].length).toFixed(0)
       : null,
     count: m.count
+    // sorts map by how many matches were played
+    // returns emtpy array uf matchesData has not loaded
   })).sort((a, b) => b.count - a.count) : []
 
+  // if an error shows error message 
   if (error) return <div className={styles.container}><p>{error}</p></div>
   if (!data) return <div className={styles.container}><p>Loading...</p></div>
   if (!matchesData) return <div className={styles.container}><p>Loading matches...</p></div>
 
+  // pulls out specific fields from API response so you dont have to keep writing data.ranks, data.rating etc.
   const { ranks, rating, stats, name, winrate, total_matches, recent_matches } = data
+  // pulls individual rating scores from inside the rating obj 
+  // ?? {} means if rating is null use empty object so no crash
   const { aim, positioning, utility, clutch, opening } = rating ?? {}
+  // gets the leetify rating from ranks obj
   const leetifyRating = ranks?.leetify
 
+  // everything inside return is whats rendered on the page
   return (
+    // this is the outer div container
     <div className={styles.container}>
       <h1 className={styles.title}>My CS2 Stats</h1>
 
       {/* View Toggle */}
+      {/* these are the nav buttons on the top of the page to change view
+        class switches between activeButton and Button depending on which view is active */}
       <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
         <button onClick={() => setView("overview")} className={view === "overview" ? styles.activeButton : styles.button}>
           Overview
@@ -99,6 +141,8 @@ export default function CS2() {
       </div>
 
       {/* Overview View */}
+      {/* Only renders the view content if the button overview is active
+          The <> is a React Fragment, lets you group multiple elements without addung an extra div */}
       {view === "overview" && (
         <>
           <section className={styles.section}>
@@ -151,6 +195,11 @@ export default function CS2() {
         </>
       )}
 
+        {/* The charts all follow the same pattern — ResponsiveContainer makes them fill their parent width, 
+        LineChart or ScatterChart is the chart type, XAxis/YAxis define the axes, Tooltip controls what shows on hover, 
+        and Line/Scatter is the actual data being plotted. */}
+
+        
       {/* Recent Match Charts */}
       {view === "recent" && (
         <>
@@ -373,6 +422,9 @@ export default function CS2() {
   )
 }
 
+// component can be reused
+// takes label, value, rating 
+// TierClass picks the right css class based on the rating which changes the color of the card
 function StatCard({ label, value, rating }) {
   const tierClass = rating === "excellent" ? styles.excellent
     : rating === "good" ? styles.good
@@ -380,6 +432,8 @@ function StatCard({ label, value, rating }) {
     : rating === "poor" ? styles.poor
     : ""
 
+  // Renders the card with both the base card class and the tier color class
+  // {value ?? "N/A"} shows "N/A" if the value is null or undefined
   return (
     <div className={`${styles.card} ${tierClass}`}>
       <p className={styles.cardLabel}>{label}</p>
