@@ -43,6 +43,8 @@ app.get("/steam/inventory", async (req, res) => {
 
 
 // ===================== CSFloat Inventory endpoint =====================
+
+/* 
 let cachedInventory = null
 let lastFetchedInventory = null
 
@@ -63,6 +65,7 @@ app.get("/csfloat/inventory", async (req, res) => {
   }
 })
 // ===================== End CSFloat Inventory endpoint =================
+*/
 
 // ================   Yahoo Stock endpoint.  ============================
 app.get("/stock/:symbol", async (req, res) => {
