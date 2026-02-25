@@ -40,3 +40,8 @@
 .read-the-docs {
   color: #888;
 }
+
+.clothing-page, .watches-page {
+  background-color: #0a1628;
+  min-height: 100vh;
+}

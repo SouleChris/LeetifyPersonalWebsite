@@ -10,6 +10,9 @@ const API_KEY = process.env.LEETIFY_API_KEY
 const { createClient } = require("@supabase/supabase-js")
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
 
+console.log("Supabase URL:", process.env.SUPABASE_URL)
+console.log("Supabase Key:", process.env.SUPABASE_KEY?.slice(0, 20))
+
 app.use(cors())
 app.use(express.json())
 
@@ -141,12 +144,15 @@ app.get("/leetify/matches", async (req, res) => {
 
 // ===================== Wishlist endpoints =====================
 app.get("/wishlist/:category", async (req, res) => {
+    console.log("Hitting wishlist endpoint, category:", req.params.category)
+  console.log("Supabase URL:", process.env.SUPABASE_URL)
   const { category } = req.params
   const { data, error } = await supabase
     .from("wishlist")
     .select("*")
     .eq("category", category)
     .order("created_at", { ascending: false })
+    console.log("Supabase data:", data, "error:", error)
   if (error) return res.status(500).json({ error: error.message })
   res.json(data)
 })
