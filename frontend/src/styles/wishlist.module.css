@@ -5,6 +5,27 @@
   font-family: sans-serif;
 }
 
+@font-face {
+  font-family: 'Marlboro';
+  src: url('./src/fonts/Marlboro.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'NorthFace';
+  src: url('./fonts/NorthFace.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Regv2i';
+  src: url('./fonts/regv2i.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'WesternCarlo';
+  src: url('./src/fonts/western carlo.otf') format('opentype');
+}
+
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -13,7 +34,7 @@
 }
 
 .title {
-  font-family: 'Libre Baskerville', serif;
+  font-family: 'WesternCarlo', serif;
   font-size: 2rem;
   font-weight: 700;
   color: #990000;
