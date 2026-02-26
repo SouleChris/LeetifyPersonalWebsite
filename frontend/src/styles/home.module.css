@@ -1,0 +1,20 @@
+/* The section becomes the grid */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  padding: 80px 40px;
+  background: #e8521a;
+}
+
+/* The divs inside it are the cells */
+.col-left h2 {
+  font-size: 3rem;
+  font-weight: 800;
+  color: white;
+}
+
+.col-right p {
+  color: white;
+  line-height: 1.6;
+}

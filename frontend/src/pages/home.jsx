@@ -1,22 +1,17 @@
 export default function Home() {
   return (
-    <body>
+    <main>
+      <header>
+      </header>
 
-  <header class="navbar">
-
-  </header>
-  <section class="content-grid">
-
-    <div class="col-left">
-      <h2>Welcome to a new kind of agency</h2>
-    </div>
-
-    <div class="col-right">
-      <p>Description text here</p>
-    </div>
-
-  </section>
-
-</body>
+      <section className="content-grid">
+        <div className="col-left">
+          <h2>Welcome to a new kind of agency</h2>
+        </div>
+        <div className="col-right">
+          <p>Description text here</p>
+        </div>
+      </section>
+    </main>
   )
 }
