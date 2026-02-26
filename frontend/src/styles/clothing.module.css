@@ -1,8 +1,15 @@
 .container {
-  max-width: 1100px;
+  max-width: 100%;          /* was 1100px — let it breathe full width */
   margin: 0 auto;
-  padding: 2rem;
+  padding: 3rem 2rem;       /* more generous horizontal padding */
   font-family: sans-serif;
+  gap: 1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
 }
 
 .title {
@@ -26,12 +33,6 @@
   letter-spacing: 1px;
   color: #888;
   margin-bottom: 1rem;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 0.75rem;
 }
 
 .card {
