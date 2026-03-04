@@ -208,7 +208,7 @@ export default function CS2() {
             <div style={{ width: "100%", height: 300 }}>
               <ResponsiveContainer>
                 <LineChart
-                  data={recent_matches?.slice(0, 30).reverse().map((match, i) => ({
+                  data={recent_matches?.slice(0, 30).map((match, i) => ({
                     game: i + 1,
                     reaction_time: match.reaction_time_ms,
                     map: match.map_name,
@@ -225,7 +225,7 @@ export default function CS2() {
                     formatter={(value) => [`${value}ms`, "Reaction Time"]}
                     labelFormatter={(label, payload) => payload?.[0]?.payload?.date ?? `Match ${label}`}
                   />
-                  <Line type="monotone" dataKey="reaction_time" stroke="#f5c842" strokeWidth={2} dot={{ fill: "#f5c842", r: 3 }} activeDot={{ r: 6, fill: "#a8b8a0" }} />
+                  <Line type="monotone" dataKey="reaction_time" stroke="#17c700ff" strokeWidth={2} dot={{ fill: "#0c7500ff", r: 3 }} activeDot={{ r: 6, fill: "#ea0000ff" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -236,7 +236,7 @@ export default function CS2() {
             <div style={{ width: "100%", height: 300 }}>
               <ResponsiveContainer>
                 <LineChart
-                  data={recent_matches?.slice(0, 30).reverse().map((match, i) => ({
+                  data={recent_matches?.slice(0, 30).map((match, i) => ({
                     game: i + 1,
                     preaim: match.preaim,
                     map: match.map_name,
@@ -246,7 +246,7 @@ export default function CS2() {
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#3a3a3a" />
                   <XAxis dataKey="game" label={{ value: "Match", position: "insideBottom", offset: -5, fill: "#a8b8a0" }} tick={{ fill: "#a8b8a0" }} />
-                  <YAxis label={{ value: "%", angle: -90, position: "insideLeft", fill: "#a8b8a0" }} tick={{ fill: "#a8b8a0" }} domain={["auto", "auto"]} />
+                  <YAxis label={{ value: "%", angle: -90, position: "insideLeft", fill: "#a8b8a0" }} tick={{ fill: "#b8a0a0ff" }} domain={["auto", "auto"]} />
                   <Tooltip
                     contentStyle={{ backgroundColor: "#2c2c2c", border: "1px solid #f5c842", borderRadius: "8px" }}
                     labelStyle={{ color: "#a8b8a0" }}
@@ -256,7 +256,7 @@ export default function CS2() {
                       return match ? `${match.date} — ${match.map}` : `Match ${label}`
                     }}
                   />
-                  <Line type="monotone" dataKey="preaim" stroke="#a8b8a0" strokeWidth={2} dot={{ fill: "#a8b8a0", r: 3 }} activeDot={{ r: 6, fill: "#f5c842" }} />
+                  <Line type="monotone" dataKey="preaim" stroke="#ff5349ff" strokeWidth={2} dot={{ fill: "#fc2c2cff", r: 3 }} activeDot={{ r: 6, fill: "#46f939ff" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -279,7 +279,7 @@ export default function CS2() {
                       return m ? `${m.date} — ${m.map}` : `Match ${label}`
                     }}
                   />
-                  <Line type="monotone" dataKey="hs_kills" stroke="#f5c842" strokeWidth={2} dot={{ fill: "#f5c842", r: 3 }} activeDot={{ r: 6, fill: "#a8b8a0" }} />
+                  <Line type="monotone" dataKey="hs_kills" stroke="#f54242ff" strokeWidth={2} dot={{ fill: "#b40000ff", r: 3 }} activeDot={{ r: 6, fill: "#46d100ff" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -384,8 +384,8 @@ export default function CS2() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Stats By Map</h2>
           {[
-            { key: "kd", label: "K/D Ratio", color: "#f5c842" },
-            { key: "dpr", label: "Damage Per Round", color: "#a8b8a0" },
+            { key: "kd", label: "K/D Ratio", color: "#429ef5ff" },
+            { key: "dpr", label: "Damage Per Round", color: "#ef8624ff" },
             { key: "hs_kills", label: "Avg Headshot Kills", color: "#f5c842" },
             { key: "trade_kill", label: "Trade Kill Success %", color: "#a8b8a0" },
             { key: "preaim", label: "Preaim", color: "#a8b8a0" },
