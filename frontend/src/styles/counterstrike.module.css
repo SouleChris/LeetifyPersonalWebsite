@@ -153,12 +153,13 @@
   color: #2c2c2c;
 }
 
+/* Button color on top under my cs2 stats */
 .activeButton {
   padding: 0.6rem 1.5rem;
   border-radius: 8px;
-  border: 1px solid #a8b8a0;
-  background-color: #f0f7f0;
-  color: #4a7c4e;
+  border: 1px solid #a0aab8;
+  background-color: #f0f1f7;
+  color: #215fbc;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -180,9 +181,10 @@
   transition: all 0.15s ease;
 }
 
+/* Maps on select map cards in the match history tab*/
 .mapCard:hover {
-  background: #f0f7f0;
-  border-color: #a8b8a0;
+  background: #eef6fb;
+  border-color: #255bac;
   transform: translateY(-2px);
 }
 

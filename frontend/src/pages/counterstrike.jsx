@@ -46,7 +46,7 @@ export default function CS2() {
 
   const mapStats = matchesData ? Object.values(
     matchesData.reduce((acc, match) => {
-      const me = match.stats?.find(p => p.steam64_id === "76561198190351278")
+      const me = match.stats?.find(p => p.steam64_id === import.meta.env.VITE_STEAM_ID)
       if (!me) return acc
       const map = match.map_name
       const mapShort = map.replace("de_", "").replace("cs_", "")
@@ -212,11 +212,11 @@ export default function CS2() {
                   <YAxis label={{ value: "ms", angle: -90, position: "insideLeft", fill: "#a8b8a0" }} tick={{ fill: "#a8b8a0" }} domain={["auto", "auto"]} />
                   <Tooltip
                     contentStyle={{ backgroundColor: "#2c2c2c", border: "1px solid #f5c842", borderRadius: "8px" }}
-                    labelStyle={{ color: "#a8b8a0" }}
+                    labelStyle={{ color: "#b8a0a0ff" }}
                     formatter={(value) => [`${value}ms`, "Reaction Time"]}
                     labelFormatter={(label, payload) => payload?.[0]?.payload?.date ?? `Match ${label}`}
                   />
-                  <Line type="monotone" dataKey="reaction_time" stroke="#17c700ff" strokeWidth={2} dot={{ fill: "#0c7500ff", r: 3 }} activeDot={{ r: 6, fill: "#ea0000ff" }} />
+                  <Line type="monotone" dataKey="reaction_time" stroke="#6499dbff" strokeWidth={2} dot={{ fill: "#6074c4ff", r: 3 }} activeDot={{ r: 6, fill: "#0c00eaff" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -247,7 +247,7 @@ export default function CS2() {
                       return match ? `${match.date} — ${match.map}` : `Match ${label}`
                     }}
                   />
-                  <Line type="monotone" dataKey="preaim" stroke="#ff5349ff" strokeWidth={2} dot={{ fill: "#fc2c2cff", r: 3 }} activeDot={{ r: 6, fill: "#46f939ff" }} />
+                  <Line type="monotone" dataKey="preaim" stroke="#e78f5cff" strokeWidth={2} dot={{ fill: "#fc642cff", r: 3 }} activeDot={{ r: 6, fill: "#dd4b02ff" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -270,7 +270,7 @@ export default function CS2() {
                       return m ? `${m.date} — ${m.map}` : `Match ${label}`
                     }}
                   />
-                  <Line type="monotone" dataKey="hs_kills" stroke="#f54242ff" strokeWidth={2} dot={{ fill: "#b40000ff", r: 3 }} activeDot={{ r: 6, fill: "#46d100ff" }} />
+                  <Line type="monotone" dataKey="hs_kills" stroke="#6499dbff" strokeWidth={2} dot={{ fill: "#6074c4ff", r: 3 }} activeDot={{ r: 6, fill: "#0c00eaff" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -293,7 +293,7 @@ export default function CS2() {
                       return m ? `${m.date} — ${m.map}` : `Match ${label}`
                     }}
                   />
-                  <Line type="monotone" dataKey="kd" stroke="#a8b8a0" strokeWidth={2} dot={{ fill: "#a8b8a0", r: 3 }} activeDot={{ r: 6, fill: "#f5c842" }} />
+                  <Line type="monotone" dataKey="kd" stroke="#e78f5cff" strokeWidth={2} dot={{ fill: "#fc642cff", r: 3 }} activeDot={{ r: 6, fill: "#dd4b02ff" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -316,7 +316,7 @@ export default function CS2() {
                       return m ? `${m.date} — ${m.map}` : `Match ${label}`
                     }}
                   />
-                  <Line type="monotone" dataKey="dpr" stroke="#f5c842" strokeWidth={2} dot={{ fill: "#f5c842", r: 3 }} activeDot={{ r: 6, fill: "#a8b8a0" }} />
+                  <Line type="monotone" dataKey="dpr" stroke="#6499dbff" strokeWidth={2} dot={{ fill: "#6499dbff", r: 3 }} activeDot={{ r: 6, fill: "#0c00eaff" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -339,7 +339,7 @@ export default function CS2() {
                       return m ? `${m.date} — ${m.map}` : `Match ${label}`
                     }}
                   />
-                  <Line type="monotone" dataKey="trade_kill" stroke="#a8b8a0" strokeWidth={2} dot={{ fill: "#a8b8a0", r: 3 }} activeDot={{ r: 6, fill: "#f5c842" }} />
+                  <Line type="monotone" dataKey="trade_kill" stroke="#e78f5cff" strokeWidth={2} dot={{ fill: "#fc642cff", r: 3 }} activeDot={{ r: 6, fill: "#dd4b02ff" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -362,7 +362,7 @@ export default function CS2() {
                       return m ? `${m.date} — ${m.map}` : `Match ${label}`
                     }}
                   />
-                  <Line type="monotone" dataKey="counter_strafing" stroke="#f5c842" strokeWidth={2} dot={{ fill: "#f5c842", r: 3 }} activeDot={{ r: 6, fill: "#a8b8a0" }} />
+                  <Line type="monotone" dataKey="counter_strafing" stroke="#6499dbff" strokeWidth={2} dot={{ fill: "#6499dbff", r: 3 }} activeDot={{ r: 6, fill: "#0c00eaff" }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -377,10 +377,10 @@ export default function CS2() {
           {[
             { key: "kd", label: "K/D Ratio", color: "#429ef5ff" },
             { key: "dpr", label: "Damage Per Round", color: "#ef8624ff" },
-            { key: "hs_kills", label: "Avg Headshot Kills", color: "#f5c842" },
-            { key: "trade_kill", label: "Trade Kill Success %", color: "#a8b8a0" },
-            { key: "preaim", label: "Preaim", color: "#a8b8a0" },
-            { key: "reaction_time", label: "Reaction Time (ms)", color: "#f5c842" },
+            { key: "hs_kills", label: "Avg Headshot Kills", color: "#6499dbff" },
+            { key: "trade_kill", label: "Trade Kill Success %", color: "#ef8624ff"},
+            { key: "preaim", label: "Preaim", color: "#6499dbff"},
+            { key: "reaction_time", label: "Reaction Time (ms)", color: "#ef8624ff" },
           ].map(({ key, label, color }) => (
             <div key={key} style={{ marginBottom: "2rem" }}>
               <h3 style={{ color: "#888", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "0.75rem" }}>{label}</h3>
