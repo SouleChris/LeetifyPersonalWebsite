@@ -41,6 +41,105 @@ app.get("/steam/inventory", async (req, res) => {
 })
 // ===================== End Steam CS2 Inventory endpoint =================
 
+// ===================== Finance - Accounts =====================
+app.get("/finance/accounts", async (req, res) => {
+  const { data, error } = await supabase.from("accounts").select("*").order("created_at", { ascending: true })
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data)
+})
+
+app.post("/finance/accounts", async (req, res) => {
+  const { id, name, type, balance } = req.body
+  const { data, error } = await supabase.from("accounts").insert([{ id, name, type, balance }]).select()
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data[0])
+})
+
+app.patch("/finance/accounts/:id", async (req, res) => {
+  const { name, type, balance } = req.body
+  const { data, error } = await supabase.from("accounts").update({ name, type, balance }).eq("id", req.params.id).select()
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data[0])
+})
+
+app.delete("/finance/accounts/:id", async (req, res) => {
+  const { error } = await supabase.from("accounts").delete().eq("id", req.params.id)
+  if (error) return res.status(500).json({ error: error.message })
+  res.json({ success: true })
+})
+// ===================== End Finance - Accounts =====================
+
+// ===================== Finance - Transactions =====================
+app.get("/finance/transactions", async (req, res) => {
+  const { data, error } = await supabase.from("transactions").select("*").order("date", { ascending: false })
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data)
+})
+
+app.post("/finance/transactions", async (req, res) => {
+  const { id, account_id, business, amount, date, notes, needs_venmo, was_venmoed, category, tx_type } = req.body
+  const { data, error } = await supabase.from("transactions").insert([{ id, account_id, business, amount, date, notes, needs_venmo, was_venmoed, category, tx_type }]).select()
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data[0])
+})
+
+app.patch("/finance/transactions/:id", async (req, res) => {
+  const { account_id, business, amount, date, notes, needs_venmo, was_venmoed, category, tx_type } = req.body
+  const { data, error } = await supabase.from("transactions").update({ account_id, business, amount, date, notes, needs_venmo, was_venmoed, category, tx_type }).eq("id", req.params.id).select()
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data[0])
+})
+
+app.delete("/finance/transactions/:id", async (req, res) => {
+  const { error } = await supabase.from("transactions").delete().eq("id", req.params.id)
+  if (error) return res.status(500).json({ error: error.message })
+  res.json({ success: true })
+})
+// ===================== End Finance - Transactions =====================
+
+// ===================== Finance - Subscriptions =====================
+app.get("/finance/subscriptions", async (req, res) => {
+  const { data, error } = await supabase.from("subscriptions").select("*").order("created_at", { ascending: true })
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data)
+})
+
+app.post("/finance/subscriptions", async (req, res) => {
+  const { id, name, cost, cycle, next_date, category, notes } = req.body
+  const { data, error } = await supabase.from("subscriptions").insert([{ id, name, cost, cycle, next_date, category, notes }]).select()
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data[0])
+})
+
+app.patch("/finance/subscriptions/:id", async (req, res) => {
+  const { name, cost, cycle, next_date, category, notes } = req.body
+  const { data, error } = await supabase.from("subscriptions").update({ name, cost, cycle, next_date, category, notes }).eq("id", req.params.id).select()
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data[0])
+})
+
+app.delete("/finance/subscriptions/:id", async (req, res) => {
+  const { error } = await supabase.from("subscriptions").delete().eq("id", req.params.id)
+  if (error) return res.status(500).json({ error: error.message })
+  res.json({ success: true })
+})
+// ===================== End Finance - Subscriptions =====================
+
+// ===================== Finance - Budgets =====================
+app.get("/finance/budgets", async (req, res) => {
+  const { data, error } = await supabase.from("budgets").select("*")
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data)
+})
+
+app.post("/finance/budgets", async (req, res) => {
+  const { id, amount } = req.body
+  const { data, error } = await supabase.from("budgets").upsert([{ id, amount }]).select()
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data[0])
+})
+// ===================== End Finance - Budgets =====================
+
 
 // ===================== CSFloat Inventory endpoint =====================
 

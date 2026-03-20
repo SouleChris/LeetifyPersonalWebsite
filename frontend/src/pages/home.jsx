@@ -6,10 +6,10 @@ export default function Home() {
 
       <section className="content-grid">
         <div className="col-left">
-          <h2>Welcome to a new kind of agency</h2>
+          <h2>Welcome</h2>
         </div>
         <div className="col-right">
-          <p>Description text here</p>
+          <p>Need to add description text here</p>
         </div>
       </section>
     </main>

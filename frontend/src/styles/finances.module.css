@@ -1,0 +1,575 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: sans-serif;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin-bottom: 1.5rem;
+}
+
+.nav {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.button {
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #eeeeee;
+  background-color: #f9f9f9;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.button:hover {
+  background-color: #f0f0f0;
+  color: #2c2c2c;
+}
+
+.activeButton {
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #a8b8a0;
+  background-color: #f0f7f0;
+  color: #4a7c4e;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.metricCard {
+  background: #f9f9f9;
+  border: 1px solid #eeeeee;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.metricLabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin: 0 0 0.25rem 0;
+}
+
+.metricVal {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin: 0;
+}
+
+.section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid #eeeeee;
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  margin: 0 0 1rem 0;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.addButton {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #a8b8a0;
+  background-color: #f0f7f0;
+  color: #4a7c4e;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.addButton:hover { background-color: #e0f0e0; }
+
+.form {
+  background: #f9f9f9;
+  border: 1px solid #eeeeee;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.formTitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  margin: 0 0 1rem 0;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+}
+
+.label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+}
+
+.input {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #eeeeee;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #2c2c2c;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.input:focus { border-color: #a8b8a0; }
+
+.submitButton {
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #a8b8a0;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.submitButton:hover { background-color: #8fa888; }
+
+.cancelButton {
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid #eeeeee;
+  background: #f9f9f9;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.deleteButton {
+  font-size: 0.72rem;
+  color: #ccc;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.deleteButton:hover { color: #e57373; }
+
+.editButton {
+  font-size: 0.72rem;
+  color: #a8b8a0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-weight: 600;
+}
+
+.editButton:hover { color: #4a7c4e; }
+
+.empty {
+  color: #aaa;
+  font-size: 0.85rem;
+  padding: 0.5rem 0;
+}
+
+.categoryGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: #2c2c2c;
+  cursor: pointer;
+}
+
+.checkbox { accent-color: #a8b8a0; cursor: pointer; }
+
+.accountSummaryList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.accountSummaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #eeeeee;
+}
+
+.accountSummaryType {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin: 0;
+}
+
+.accountSummaryName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin: 0.1rem 0 0 0;
+}
+
+.accountSummaryBalance {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.txLayout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.txSidebar {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid #eeeeee;
+}
+
+.sidebarItem {
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #2c2c2c;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.sidebarItem:hover { background: #f9f9f9; }
+
+.sidebarItemActive {
+  background: #f0f7f0;
+  border-color: #a8b8a0;
+  color: #4a7c4e;
+  font-weight: 600;
+}
+
+.sidebarType {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #888;
+}
+
+.txPanel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid #eeeeee;
+}
+
+.txPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.txPanelTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin: 0;
+}
+
+.txPanelSub {
+  font-size: 0.75rem;
+  color: #888;
+  margin: 0.2rem 0 0 0;
+}
+
+.txItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.txLeft { flex: 1; }
+
+.txBusiness {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin: 0 0 0.15rem 0;
+}
+
+.txMeta {
+  font-size: 0.75rem;
+  color: #888;
+  margin: 0;
+}
+
+.txAmount {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.venmoBadge {
+  display: inline-block;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  background: #fff3e0;
+  border: 1px solid #ffcc80;
+  color: #e65100;
+  font-weight: 600;
+}
+
+.venmoedBadge {
+  display: inline-block;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  background: #f0f7f0;
+  border: 1px solid #a8b8a0;
+  color: #4a7c4e;
+  font-weight: 600;
+}
+
+.subTotal {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0.2rem 0 0 0;
+}
+
+.subList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.subCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: #fff;
+  border: 1px solid #eeeeee;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.subCardLeft { flex: 1; }
+
+.subName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin: 0 0 0.2rem 0;
+}
+
+.subMeta {
+  font-size: 0.75rem;
+  color: #888;
+  margin: 0;
+}
+
+.subNotes {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin: 0.2rem 0 0 0;
+}
+
+.subCost {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e57373;
+  margin: 0 0 0.15rem 0;
+}
+
+.subMonthly {
+  font-size: 0.75rem;
+  color: #888;
+  margin: 0 0 0.25rem 0;
+}
+
+.overviewLayout {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding: 0 2rem;
+}
+
+.overviewStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.overviewStatCard {
+  background: #f9f9f9;
+  border: 1px solid #eeeeee;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+
+.overviewChartCard {
+  background: #fff;
+  border: 1px solid #eeeeee;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.overviewChartTitle {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  margin: 0 0 1rem 0;
+}
+
+.overviewBottomGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.setBudgetBtn {
+  font-size: 0.72rem;
+  color: #a8b8a0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 0.4rem;
+  font-weight: 600;
+  display: block;
+}
+
+.setBudgetBtn:hover { color: #4a7c4e; }
+
+.progressBar {
+  height: 5px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.catRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.catLabel {
+  font-size: 0.8rem;
+  color: #2c2c2c;
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.catBarWrap {
+  flex: 1;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.catBar {
+  height: 100%;
+  background: #a8b8a0;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.catVal {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2c2c2c;
+  width: 70px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.nav a {
+  text-decoration: none;
+}

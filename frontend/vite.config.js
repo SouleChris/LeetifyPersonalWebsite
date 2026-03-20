@@ -7,7 +7,8 @@ export default defineConfig({
     proxy: {
       '/stock': 'http://localhost:3000',
       '/leetify': 'http://localhost:3000',
-      '/steam' : 'http://localhost:3000',
+      '/steam': 'http://localhost:3000',
+      '/finance': 'http://localhost:3000',
     }
   }
 })

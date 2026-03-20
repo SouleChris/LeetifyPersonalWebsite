@@ -9,6 +9,7 @@ export default function Navbar() {
       <Link to="/about" className={styles.link}>About</Link>
       <Link to="/stocks" className={styles.link}>Stocks</Link>
       <Link to="/counterstrike" className={styles.link}>Counterstrike</Link>
+      <Link to="/finances" className={styles.link}>Finances</Link>
       <Link to="/clothing" className={styles.link}>Clothing</Link>
       <Link to="/watches" className={styles.link}>Watches</Link>
     </nav>

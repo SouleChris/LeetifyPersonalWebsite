@@ -7,6 +7,7 @@ import Stocks from "./pages/stocks"
 import Page4 from "./pages/clothing"
 import Page5 from "./pages/watches"
 import Counterstrike from "./pages/counterstrike"
+import Finances from "./pages/finances"
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/clothing" element={<Page4 />} />
         <Route path="/watches" element={<Page5 />} />
         <Route path="/counterstrike" element={<Counterstrike />} />
+        <Route path="/finances" element={<Finances />} />
       </Routes>
       </main>
       <Footer />
