@@ -16,6 +16,13 @@ console.log("Supabase Key:", process.env.SUPABASE_KEY?.slice(0, 20))
 app.use(cors())
 app.use(express.json())
 
+// warm up Supabase connection on server start
+supabase.from("accounts").select("count").then(() => {
+  console.log("Supabase connection ready")
+}).catch(() => {
+  console.log("Supabase warmup failed - will retry on first request")
+})
+
 // ===================== Steam CS2 Inventory endpoint =====================
 let cachedSteamInventory = null
 let lastFetchedSteamInventory = null
