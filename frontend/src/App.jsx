@@ -8,6 +8,7 @@ import Page4 from "./pages/clothing"
 import Page5 from "./pages/watches"
 import Counterstrike from "./pages/counterstrike"
 import Finances from "./pages/finances"
+import Workout from "./pages/workout"
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/watches" element={<Page5 />} />
         <Route path="/counterstrike" element={<Counterstrike />} />
         <Route path="/finances" element={<Finances />} />
+        <Route path="/workout" element={<Workout />} />
       </Routes>
       </main>
       <Footer />
