@@ -9,6 +9,7 @@ import { useState, useEffect, useMemo } from "react"
 import styles from "../styles/finances.module.css"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts"
 
+// 
 const CATEGORIES = ["Restaurant", "Grocery", "Gas", "Clothing", "Home", "Personal Product", "Car", "Beer", "Transportation", "Videogame", "Other"]
 const CATEGORY_COLORS = {
   "Restaurant": "#f54242", "Grocery": "#4caf50", "Gas": "#ff9800",
@@ -16,11 +17,13 @@ const CATEGORY_COLORS = {
   "Car": "#795548", "Beer": "#ffc107", "Transportation": "#607d8b",
   "Videogame": "#e91e63", "Other": "#9e9e9e"
 }
+//
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const EMPTY_TX_FORM = { account_id: "", business: "", amount: "", date: new Date().toISOString().split("T")[0], notes: "", needs_venmo: false, was_venmoed: false, category: "", tx_type: "debit" }
 const EMPTY_SUB_FORM = { name: "", cost: "", cycle: "monthly", next_date: "", category: "", notes: "" }
 const EMPTY_ACCOUNT_FORM = { name: "", type: "checking", balance: "" }
 
+//
 export default function Finances() {
   const [view, setView] = useState("summary")
   const [loading, setLoading] = useState(true)

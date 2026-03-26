@@ -23,6 +23,53 @@ supabase.from("accounts").select("count").then(() => {
   console.log("Supabase warmup failed - will retry on first request")
 })
 
+// ===================== Workouts =====================
+app.get("/workouts", async (req, res) => {
+  const { data, error } = await supabase.from("workouts").select("*").order("date", { ascending: false })
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data)
+})
+
+app.post("/workouts", async (req, res) => {
+  const { id, date, type, duration, distance, pace, calories, notes, muscle_groups, source } = req.body
+  const { data, error } = await supabase.from("workouts").insert([{ id, date, type, duration, distance, pace, calories, notes, muscle_groups, source }]).select()
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data[0])
+})
+
+app.patch("/workouts/:id", async (req, res) => {
+  const { date, type, duration, distance, pace, calories, notes, muscle_groups } = req.body
+  const { data, error } = await supabase.from("workouts").update({ date, type, duration, distance, pace, calories, notes, muscle_groups }).eq("id", req.params.id).select()
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data[0])
+})
+
+app.delete("/workouts/:id", async (req, res) => {
+  const { error } = await supabase.from("workouts").delete().eq("id", req.params.id)
+  if (error) return res.status(500).json({ error: error.message })
+  res.json({ success: true })
+})
+
+app.get("/workouts/exercises/:workoutId", async (req, res) => {
+  const { data, error } = await supabase.from("workout_exercises").select("*").eq("workout_id", req.params.workoutId)
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data)
+})
+
+app.post("/workouts/exercises", async (req, res) => {
+  const { id, workout_id, name, sets, reps, weight } = req.body
+  const { data, error } = await supabase.from("workout_exercises").insert([{ id, workout_id, name, sets, reps, weight }]).select()
+  if (error) return res.status(500).json({ error: error.message })
+  res.json(data[0])
+})
+
+app.delete("/workouts/exercises/:id", async (req, res) => {
+  const { error } = await supabase.from("workout_exercises").delete().eq("id", req.params.id)
+  if (error) return res.status(500).json({ error: error.message })
+  res.json({ success: true })
+})
+// ===================== End Workouts =====================
+
 // ===================== Steam CS2 Inventory endpoint =====================
 let cachedSteamInventory = null
 let lastFetchedSteamInventory = null

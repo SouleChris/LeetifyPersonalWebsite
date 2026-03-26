@@ -12,6 +12,7 @@ export default function Navbar() {
       <Link to="/finances" className={styles.link}>Finances</Link>
       <Link to="/clothing" className={styles.link}>Clothing</Link>
       <Link to="/watches" className={styles.link}>Watches</Link>
+      <Link to="/workout" className={styles.link}>Workout</Link>
     </nav>
   )
 }

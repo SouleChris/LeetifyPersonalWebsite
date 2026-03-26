@@ -1,0 +1,669 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: sans-serif;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin-bottom: 1.5rem;
+}
+
+.nav {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.button {
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #eeeeee;
+  background-color: #f9f9f9;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.button:hover {
+  background-color: #f0f0f0;
+  color: #2c2c2c;
+}
+
+.activeButton {
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #a8b8a0;
+  background-color: #f0f7f0;
+  color: #4a7c4e;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border: 1px solid #eeeeee;
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  margin: 0 0 1rem 0;
+}
+
+.addButton {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #a8b8a0;
+  background-color: #f0f7f0;
+  color: #4a7c4e;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.addButton:hover { background-color: #e0f0e0; }
+
+.form {
+  background: #f9f9f9;
+  border: 1px solid #eeeeee;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.formTitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  margin: 0 0 1rem 0;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+}
+
+.label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+}
+
+.input {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #eeeeee;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #2c2c2c;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.input:focus { border-color: #a8b8a0; }
+
+.submitButton {
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #a8b8a0;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submitButton:hover { background-color: #8fa888; }
+
+.cancelButton {
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid #eeeeee;
+  background: #f9f9f9;
+  color: #888;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.editButton {
+  font-size: 0.72rem;
+  color: #a8b8a0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-weight: 600;
+}
+
+.editButton:hover { color: #4a7c4e; }
+
+.deleteButton {
+  font-size: 0.72rem;
+  color: #ccc;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.deleteButton:hover { color: #e57373; }
+
+.empty {
+  color: #aaa;
+  font-size: 0.85rem;
+  padding: 0.5rem 0;
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: #2c2c2c;
+  cursor: pointer;
+}
+
+.checkbox { accent-color: #a8b8a0; cursor: pointer; }
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.metricCard {
+  background: #f9f9f9;
+  border: 1px solid #eeeeee;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.metricLabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin: 0 0 0.25rem 0;
+}
+
+.metricVal {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin: 0;
+}
+
+.summaryToggle {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.summaryBottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Today */
+.todayLayout {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.todayCard {
+  background: #fff;
+  border: 1px solid #eeeeee;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.todayDate {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.todayEmpty {
+  text-align: center;
+  padding: 2rem 0;
+  color: #888;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.todayWorkout {
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #eeeeee;
+}
+
+.todayWorkoutHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.todayStats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.todayStat {
+  display: flex;
+  flex-direction: column;
+}
+
+.todayStatLabel {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+}
+
+.todayStatVal {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c2c2c;
+}
+
+/* Calendar */
+.calendarLayout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.calendarSection {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #eeeeee;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.calendarTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin: 0;
+}
+
+.calNavBtn {
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #eeeeee;
+  background: #f9f9f9;
+  color: #888;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.calNavBtn:hover { background: #f0f0f0; }
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendarDayLabel {
+  text-align: center;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  padding: 0.5rem 0;
+  font-weight: 600;
+}
+
+.calendarDay {
+  min-height: 60px;
+  padding: 0.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border: 1px solid transparent;
+}
+
+.calendarDay:hover { background: #f9f9f9; }
+
+.calendarDayOtherMonth .calendarDayNum { color: #ccc; }
+
+.calendarDayToday {
+  background: #f0f7f0;
+  border-color: #a8b8a0;
+}
+
+.calendarDaySelected {
+  background: #e8f5e8;
+  border-color: #4a7c4e;
+}
+
+.calendarDayNum {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2c2c2c;
+  display: block;
+}
+
+.calendarDots {
+  display: flex;
+  gap: 3px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.calendarIcon {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.calendarLegend {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: #888;
+}
+
+.calendarPanel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid #eeeeee;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  min-height: 400px;
+}
+
+.calendarPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.calendarPanelTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin: 0;
+}
+
+/* Workout cards */
+.workoutCard {
+  background: #f9f9f9;
+  border: 1px solid #eeeeee;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.6rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.workoutCard:hover { border-color: #a8b8a0; }
+
+.workoutCardSelected { border-color: #4a7c4e; background: #f0f7f0; }
+
+.workoutCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.workoutCardStats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.82rem;
+  color: #888;
+  flex-wrap: wrap;
+}
+
+.workoutDate {
+  font-size: 0.78rem;
+  color: #888;
+}
+
+.workoutTypeBadge {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.run { background: #e8f5e8; color: #4a7c4e; }
+.lift { background: #fef9e7; color: #b7860b; }
+.hike { background: #f5ede7; color: #8B4513; }
+.other { background: #f5f5f5; color: #888; }
+
+.workoutNotes {
+  font-size: 0.78rem;
+  color: #888;
+  margin: 0.4rem 0 0 0;
+}
+
+.muscleGroups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+
+.muscleTag {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 20px;
+  background: #f0f7f0;
+  border: 1px solid #a8b8a0;
+  color: #4a7c4e;
+}
+
+.exerciseList {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eeeeee;
+}
+
+.exerciseListTitle {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin: 0 0 0.5rem 0;
+}
+
+.exerciseItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.exerciseName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2c2c2c;
+}
+
+.exerciseDetails {
+  font-size: 0.82rem;
+  color: #888;
+}
+
+.exerciseFormRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.addExerciseBtn {
+  font-size: 0.78rem;
+  color: #a8b8a0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.3rem 0;
+  font-weight: 600;
+}
+
+.addExerciseBtn:hover { color: #4a7c4e; }
+
+/* Summary */
+.mileTimeRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.mileTimeDate { font-size: 0.85rem; color: #888; }
+.mileTimePace { font-size: 0.85rem; font-weight: 600; color: #2c2c2c; }
+
+.heaviestLift {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin: 0;
+}
+
+/* Food */
+.foodTypeSelector {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.foodGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.foodItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.foodItemLeft { flex: 1; }
+
+.foodName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin: 0 0 0.2rem 0;
+}
+
+.foodWhy {
+  font-size: 0.75rem;
+  color: #888;
+  margin: 0;
+}
+
+.foodTiming {
+  font-size: 0.72rem;
+  color: #4a7c4e;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-left: 1rem;
+  text-align: right;
+}
+
+.waterGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.waterCard {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #eeeeee;
+}
+
+.waterLabel {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin: 0 0 0.35rem 0;
+}
+
+.waterVal {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin: 0;
+}
