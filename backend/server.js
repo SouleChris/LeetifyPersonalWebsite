@@ -45,6 +45,10 @@ app.patch("/workouts/:id", async (req, res) => {
 })
 
 app.delete("/workouts/:id", async (req, res) => {
+  // Delete exercises first to avoid orphaned rows (also handled by ON DELETE CASCADE in Supabase if configured)
+  const { error: exError } = await supabase.from("workout_exercises").delete().eq("workout_id", req.params.id)
+  if (exError) return res.status(500).json({ error: exError.message })
+
   const { error } = await supabase.from("workouts").delete().eq("id", req.params.id)
   if (error) return res.status(500).json({ error: error.message })
   res.json({ success: true })
@@ -70,7 +74,8 @@ app.delete("/workouts/exercises/:id", async (req, res) => {
 })
 // ===================== End Workouts =====================
 
-// ===================== Steam CS2 Inventory endpoint =====================
+// ===================== Steam CS2 Inventory endpoint (NOT IN USE) =====================
+/*
 let cachedSteamInventory = null
 let lastFetchedSteamInventory = null
 
@@ -87,12 +92,13 @@ app.get("/steam/inventory", async (req, res) => {
     cachedSteamInventory = response.data
     lastFetchedSteamInventory = Date.now()
     res.json(cachedSteamInventory)
+    console.log("Steam inventory:", JSON.stringify(response.data).slice(0, 2000))
   } catch (error) {
     console.error(error.response?.status, error.response?.data || error.message)
     res.status(500).json({ error: error.response?.data || error.message })
   }
-  console.log("Steam inventory:", JSON.stringify(response.data).slice(0, 2000))
 })
+*/
 // ===================== End Steam CS2 Inventory endpoint =================
 
 // ===================== Finance - Accounts =====================
@@ -117,6 +123,9 @@ app.patch("/finance/accounts/:id", async (req, res) => {
 })
 
 app.delete("/finance/accounts/:id", async (req, res) => {
+  // Delete transactions for this account first to avoid orphaned rows
+  const { error: txError } = await supabase.from("transactions").delete().eq("account_id", req.params.id)
+  if (txError) return res.status(500).json({ error: txError.message })
   const { error } = await supabase.from("accounts").delete().eq("id", req.params.id)
   if (error) return res.status(500).json({ error: error.message })
   res.json({ success: true })
@@ -196,7 +205,6 @@ app.post("/finance/budgets", async (req, res) => {
 
 
 // ===================== CSFloat Inventory endpoint =====================
-
 /* 
 let cachedInventory = null
 let lastFetchedInventory = null
@@ -217,8 +225,8 @@ app.get("/csfloat/inventory", async (req, res) => {
     res.status(500).json({ error: error.response?.data || error.message })
   }
 })
-// ===================== End CSFloat Inventory endpoint =================
 */
+// ===================== End CSFloat Inventory endpoint =================
 
 // ================   Yahoo Stock endpoint.  ============================
 app.get("/stock/:symbol", async (req, res) => {
@@ -300,7 +308,7 @@ app.get("/leetify/matches", async (req, res) => {
 
 // ===================== Wishlist endpoints =====================
 app.get("/wishlist/:category", async (req, res) => {
-    console.log("Hitting wishlist endpoint, category:", req.params.category)
+  console.log("Hitting wishlist endpoint, category:", req.params.category)
   console.log("Supabase URL:", process.env.SUPABASE_URL)
   const { category } = req.params
   const { data, error } = await supabase
@@ -308,7 +316,7 @@ app.get("/wishlist/:category", async (req, res) => {
     .select("*")
     .eq("category", category)
     .order("created_at", { ascending: false })
-    console.log("Supabase data:", data, "error:", error)
+  console.log("Supabase data:", data, "error:", error)
   if (error) return res.status(500).json({ error: error.message })
   res.json(data)
 })
@@ -324,7 +332,6 @@ app.post("/wishlist", async (req, res) => {
 })
 
 app.delete("/wishlist/:id", async (req, res) => {
-  const { id } = req.params
   const { error } = await supabase
     .from("wishlist")
     .delete()
@@ -377,9 +384,6 @@ app.get("/matches/all", async (req, res) => {
   res.json(data)
 })
 // ===================== End Matches sync endpoint =====================
-
-
-
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`)
