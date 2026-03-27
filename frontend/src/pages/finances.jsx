@@ -9,7 +9,6 @@ import { useState, useEffect, useMemo } from "react"
 import styles from "../styles/finances.module.css"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts"
 
-// 
 const CATEGORIES = ["Restaurant", "Grocery", "Gas", "Clothing", "Home", "Personal Product", "Car", "Beer", "Transportation", "Videogame", "Other"]
 const CATEGORY_COLORS = {
   "Restaurant": "#f54242", "Grocery": "#4caf50", "Gas": "#ff9800",
@@ -17,17 +16,21 @@ const CATEGORY_COLORS = {
   "Car": "#795548", "Beer": "#ffc107", "Transportation": "#607d8b",
   "Videogame": "#e91e63", "Other": "#9e9e9e"
 }
-//
+
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const EMPTY_TX_FORM = { account_id: "", business: "", amount: "", date: new Date().toISOString().split("T")[0], notes: "", needs_venmo: false, was_venmoed: false, category: "", tx_type: "debit" }
 const EMPTY_SUB_FORM = { name: "", cost: "", cycle: "monthly", next_date: "", category: "", notes: "" }
 const EMPTY_ACCOUNT_FORM = { name: "", type: "checking", balance: "" }
 
-//
+// How many days ahead counts as "due soon"
+const DUE_SOON_DAYS = 7
+
 export default function Finances() {
   const [view, setView] = useState("summary")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  // Inline action error — shown as a banner without replacing the whole page
+  const [actionError, setActionError] = useState(null)
 
   // ── State ─────────────────────────────────────────────────
   const [accounts, setAccounts] = useState([])
@@ -36,6 +39,9 @@ export default function Finances() {
   const [budgets, setBudgets] = useState({})
 
   const [selectedAccount, setSelectedAccount] = useState(null)
+  // Month filter for transactions (null = all)
+  const [txMonthFilter, setTxMonthFilter] = useState(null)
+
   const [editingTx, setEditingTx] = useState(null)
   const [editingAccount, setEditingAccount] = useState(null)
   const [editingAccountForm, setEditingAccountForm] = useState(EMPTY_ACCOUNT_FORM)
@@ -54,8 +60,8 @@ export default function Finances() {
   // ── Load all data from Supabase on mount ──────────────────
   useEffect(() => {
     const loadAll = async () => {
-    setLoading(true)
-    setError(null)
+      setLoading(true)
+      setError(null)
       try {
         const [aRes, tRes, sRes, bRes] = await Promise.all([
           fetch("/finance/accounts"),
@@ -63,11 +69,13 @@ export default function Finances() {
           fetch("/finance/subscriptions"),
           fetch("/finance/budgets")
         ])
+        if (!aRes.ok || !tRes.ok || !sRes.ok || !bRes.ok) {
+          throw new Error("One or more finance endpoints failed")
+        }
         const [a, t, s, b] = await Promise.all([aRes.json(), tRes.json(), sRes.json(), bRes.json()])
         setAccounts(a)
         setTransactions(t)
         setSubscriptions(s)
-        // convert budgets array to { id: amount } map
         const budgetMap = {}
         b.forEach(entry => { budgetMap[entry.id] = entry.amount })
         setBudgets(budgetMap)
@@ -84,6 +92,7 @@ export default function Finances() {
   // ── Account Handlers ──────────────────────────────────────
   const handleAddAccount = async () => {
     if (!accountForm.name) return
+    setActionError(null)
     const newAccount = { id: Date.now().toString(), ...accountForm, balance: parseFloat(accountForm.balance) || 0 }
     try {
       const res = await fetch("/finance/accounts", {
@@ -91,33 +100,57 @@ export default function Finances() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAccount)
       })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to add account")
+      }
       const saved = await res.json()
       setAccounts(prev => [...prev, saved])
       setAccountForm(EMPTY_ACCOUNT_FORM)
       setShowAccountForm(false)
-    } catch { setError("Failed to add account") }
+    } catch (err) {
+      console.error(err)
+      setActionError(err.message)
+    }
   }
 
   const handleSaveAccount = async (id) => {
+    setActionError(null)
     const updated = { ...editingAccountForm, balance: parseFloat(editingAccountForm.balance) || 0 }
     try {
-      await fetch(`/finance/accounts/${id}`, {
+      const res = await fetch(`/finance/accounts/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated)
       })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to update account")
+      }
       setAccounts(prev => prev.map(a => a.id === id ? { ...a, ...updated } : a))
       setEditingAccount(null)
-    } catch { setError("Failed to update account") }
+    } catch (err) {
+      console.error(err)
+      setActionError(err.message)
+    }
   }
 
   const handleDeleteAccount = async (id) => {
+    setActionError(null)
     try {
-      await fetch(`/finance/accounts/${id}`, { method: "DELETE" })
+      const res = await fetch(`/finance/accounts/${id}`, { method: "DELETE" })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to delete account")
+      }
       setAccounts(prev => prev.filter(a => a.id !== id))
+      // Transactions are cascade deleted in Supabase, remove from local state too
       setTransactions(prev => prev.filter(t => t.account_id !== id))
       if (selectedAccount === id) setSelectedAccount(null)
-    } catch { setError("Failed to delete account") }
+    } catch (err) {
+      console.error(err)
+      setActionError(err.message)
+    }
   }
 
   const handleEditAccountStart = (a) => {
@@ -128,6 +161,7 @@ export default function Finances() {
   // ── Transaction Handlers ──────────────────────────────────
   const handleAddTx = async () => {
     if (!txForm.business || !txForm.amount || !txForm.account_id) return
+    setActionError(null)
     const amount = parseFloat(txForm.amount)
     const newTx = { id: Date.now().toString(), ...txForm, amount }
     const account = accounts.find(a => a.id === txForm.account_id)
@@ -139,9 +173,12 @@ export default function Finances() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTx)
       })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to add transaction")
+      }
       const saved = await res.json()
       setTransactions(prev => [saved, ...prev])
-      // update account balance in Supabase
       await fetch(`/finance/accounts/${txForm.account_id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -150,7 +187,10 @@ export default function Finances() {
       setAccounts(prev => prev.map(a => a.id === txForm.account_id ? { ...a, balance: newBalance } : a))
       setTxForm(EMPTY_TX_FORM)
       setShowTxForm(false)
-    } catch { setError("Failed to add transaction") }
+    } catch (err) {
+      console.error(err)
+      setActionError(err.message)
+    }
   }
 
   const handleEditTx = (tx) => {
@@ -161,22 +201,36 @@ export default function Finances() {
 
   const handleSaveEditTx = async () => {
     if (!txForm.business || !txForm.amount) return
+    setActionError(null)
     const oldTx = transactions.find(t => t.id === editingTx)
     const newAmount = parseFloat(txForm.amount)
     const updatedTx = { ...txForm, amount: newAmount }
     try {
-      await fetch(`/finance/transactions/${editingTx}`, {
+      const res = await fetch(`/finance/transactions/${editingTx}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedTx)
       })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to update transaction")
+      }
       setTransactions(prev => prev.map(t => t.id === editingTx ? updatedTx : t))
-      // reverse old balance effect and apply new
+      // FIX: correctly recalculate balance by reversing the old transaction
+      // then applying the new one, rather than stacking deltas on top of each other
       if (oldTx?.account_id) {
-        const oldDelta = oldTx.tx_type === "credit" ? -oldTx.amount : oldTx.amount
-        const newDelta = txForm.tx_type === "credit" ? newAmount : -newAmount
         const account = accounts.find(a => a.id === oldTx.account_id)
-        const newBalance = parseFloat(((account?.balance ?? 0) + oldDelta + newDelta).toFixed(2))
+        const currentBalance = account?.balance ?? 0
+        // Step 1: reverse the old transaction's effect on the balance
+        const balanceWithoutOld = oldTx.tx_type === "credit"
+          ? currentBalance - oldTx.amount
+          : currentBalance + oldTx.amount
+        // Step 2: apply the new transaction
+        const newBalance = parseFloat((
+          txForm.tx_type === "credit"
+            ? balanceWithoutOld + newAmount
+            : balanceWithoutOld - newAmount
+        ).toFixed(2))
         await fetch(`/finance/accounts/${oldTx.account_id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -187,15 +241,22 @@ export default function Finances() {
       setTxForm(EMPTY_TX_FORM)
       setEditingTx(null)
       setShowTxForm(false)
-    } catch { setError("Failed to update transaction") }
+    } catch (err) {
+      console.error(err)
+      setActionError(err.message)
+    }
   }
 
   const handleDeleteTx = async (id) => {
+    setActionError(null)
     const tx = transactions.find(t => t.id === id)
     try {
-      await fetch(`/finance/transactions/${id}`, { method: "DELETE" })
+      const res = await fetch(`/finance/transactions/${id}`, { method: "DELETE" })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to delete transaction")
+      }
       setTransactions(prev => prev.filter(t => t.id !== id))
-      // reverse balance effect
       if (tx?.account_id) {
         const delta = tx.tx_type === "credit" ? -tx.amount : tx.amount
         const account = accounts.find(a => a.id === tx.account_id)
@@ -207,12 +268,16 @@ export default function Finances() {
         })
         setAccounts(prev => prev.map(a => a.id === tx.account_id ? { ...a, balance: newBalance } : a))
       }
-    } catch { setError("Failed to delete transaction") }
+    } catch (err) {
+      console.error(err)
+      setActionError(err.message)
+    }
   }
 
   // ── Subscription Handlers ─────────────────────────────────
   const handleAddSub = async () => {
     if (!subForm.name || !subForm.cost) return
+    setActionError(null)
     const newSub = { id: Date.now().toString(), ...subForm, cost: parseFloat(subForm.cost) }
     try {
       const res = await fetch("/finance/subscriptions", {
@@ -220,11 +285,18 @@ export default function Finances() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newSub)
       })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to add subscription")
+      }
       const saved = await res.json()
       setSubscriptions(prev => [...prev, saved])
       setSubForm(EMPTY_SUB_FORM)
       setShowSubForm(false)
-    } catch { setError("Failed to add subscription") }
+    } catch (err) {
+      console.error(err)
+      setActionError(err.message)
+    }
   }
 
   const handleEditSubStart = (s) => {
@@ -233,40 +305,64 @@ export default function Finances() {
   }
 
   const handleSaveEditSub = async () => {
+    setActionError(null)
     const updated = { ...editingSubForm, cost: parseFloat(editingSubForm.cost) || 0 }
     try {
-      await fetch(`/finance/subscriptions/${editingSub}`, {
+      const res = await fetch(`/finance/subscriptions/${editingSub}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated)
       })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to update subscription")
+      }
       setSubscriptions(prev => prev.map(s => s.id === editingSub ? { ...s, ...updated } : s))
       setEditingSub(null)
-    } catch { setError("Failed to update subscription") }
+    } catch (err) {
+      console.error(err)
+      setActionError(err.message)
+    }
   }
 
   const handleDeleteSub = async (id) => {
+    setActionError(null)
     try {
-      await fetch(`/finance/subscriptions/${id}`, { method: "DELETE" })
+      const res = await fetch(`/finance/subscriptions/${id}`, { method: "DELETE" })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to delete subscription")
+      }
       setSubscriptions(prev => prev.filter(s => s.id !== id))
-    } catch { setError("Failed to delete subscription") }
+    } catch (err) {
+      console.error(err)
+      setActionError(err.message)
+    }
   }
 
   // ── Budget Handlers ───────────────────────────────────────
   const currentMonthKey = `${new Date().getFullYear()}-${new Date().getMonth()}`
 
   const handleSaveBudget = async () => {
+    setActionError(null)
     const amount = parseFloat(budgetInput) || 0
     try {
-      await fetch("/finance/budgets", {
+      const res = await fetch("/finance/budgets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: currentMonthKey, amount })
       })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Failed to save budget")
+      }
       setBudgets(prev => ({ ...prev, [currentMonthKey]: amount }))
       setBudgetInput("")
       setShowBudgetForm(false)
-    } catch { setError("Failed to save budget") }
+    } catch (err) {
+      console.error(err)
+      setActionError(err.message)
+    }
   }
 
   // ── Computed Values ───────────────────────────────────────
@@ -274,11 +370,18 @@ export default function Finances() {
     a.type === "credit" ? sum - a.balance : sum + a.balance, 0), [accounts])
 
   const visibleTransactions = useMemo(() => {
-    const base = selectedAccount
+    let base = selectedAccount
       ? transactions.filter(t => t.account_id === selectedAccount)
       : transactions
+    if (txMonthFilter !== null) {
+      const now = new Date()
+      base = base.filter(t => {
+        const d = new Date(t.date)
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === txMonthFilter
+      })
+    }
     return [...base].sort((a, b) => new Date(b.date) - new Date(a.date))
-  }, [transactions, selectedAccount])
+  }, [transactions, selectedAccount, txMonthFilter])
 
   const monthlySpending = useMemo(() => {
     const now = new Date()
@@ -323,6 +426,18 @@ export default function Finances() {
     total: transactions.filter(t => t.account_id === a.id && t.tx_type !== "credit").reduce((sum, t) => sum + t.amount, 0)
   })), [accounts, transactions])
 
+  // Subscriptions due within DUE_SOON_DAYS days
+  const dueSoonSubs = useMemo(() => {
+    const now = new Date()
+    const cutoff = new Date()
+    cutoff.setDate(now.getDate() + DUE_SOON_DAYS)
+    return subscriptions.filter(s => {
+      if (!s.next_date) return false
+      const d = new Date(s.next_date)
+      return d >= now && d <= cutoff
+    })
+  }, [subscriptions])
+
   const selectedAccountObj = accounts.find(a => a.id === txForm.account_id)
 
   if (loading) return <div className={styles.container}><p>Loading finances...</p></div>
@@ -331,6 +446,14 @@ export default function Finances() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Finances</h1>
+
+      {/* Inline action error banner — doesn't replace the whole page */}
+      {actionError && (
+        <div style={{ background: "#fff3f3", border: "1px solid #e57373", borderRadius: "8px", padding: "0.75rem 1rem", marginBottom: "1rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <p style={{ color: "#e57373", margin: 0, fontSize: "0.85rem" }}>{actionError}</p>
+          <button onClick={() => setActionError(null)} style={{ background: "none", border: "none", color: "#e57373", cursor: "pointer", fontSize: "1rem" }}>✕</button>
+        </div>
+      )}
 
       {/* Nav */}
       <div className={styles.nav}>
@@ -360,6 +483,20 @@ export default function Finances() {
               <p className={styles.metricVal} style={{ color: "#e57373" }}>${totalMonthlySubCost.toFixed(2)}/mo</p>
             </div>
           </div>
+
+          {/* Due soon warning */}
+          {dueSoonSubs.length > 0 && (
+            <div style={{ background: "#fffbea", border: "1px solid #f5c842", borderRadius: "8px", padding: "0.75rem 1rem", marginBottom: "1rem" }}>
+              <p style={{ margin: "0 0 0.4rem 0", fontSize: "0.78rem", fontWeight: 700, color: "#b7860b", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Due within {DUE_SOON_DAYS} days
+              </p>
+              {dueSoonSubs.map(s => (
+                <p key={s.id} style={{ margin: "0.2rem 0", fontSize: "0.85rem", color: "#2c2c2c" }}>
+                  {s.name} — ${s.cost.toFixed(2)} on {s.next_date}
+                </p>
+              ))}
+            </div>
+          )}
 
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Accounts</h2>
@@ -402,6 +539,24 @@ export default function Finances() {
                 <span className={styles.sidebarType}>{a.type}</span>
               </div>
             ))}
+
+            {/* Month filter */}
+            <p className={styles.sectionTitle} style={{ marginTop: "1.5rem" }}>Filter by Month</p>
+            <div
+              className={`${styles.sidebarItem} ${txMonthFilter === null ? styles.sidebarItemActive : ""}`}
+              onClick={() => setTxMonthFilter(null)}
+            >
+              All months
+            </div>
+            {MONTHS.map((m, i) => (
+              <div
+                key={i}
+                className={`${styles.sidebarItem} ${txMonthFilter === i ? styles.sidebarItemActive : ""}`}
+                onClick={() => setTxMonthFilter(i)}
+              >
+                {m}
+              </div>
+            ))}
           </div>
 
           <div className={styles.txPanel}>
@@ -409,6 +564,7 @@ export default function Finances() {
               <div>
                 <p className={styles.txPanelTitle}>
                   {selectedAccount ? accounts.find(a => a.id === selectedAccount)?.name : "All Transactions"}
+                  {txMonthFilter !== null ? ` — ${MONTHS[txMonthFilter]}` : ""}
                 </p>
                 <p className={styles.txPanelSub}>{visibleTransactions.length} transactions</p>
               </div>
@@ -627,6 +783,20 @@ export default function Finances() {
             </button>
           </div>
 
+          {/* Due soon warning on subscriptions page */}
+          {dueSoonSubs.length > 0 && (
+            <div style={{ background: "#fffbea", border: "1px solid #f5c842", borderRadius: "8px", padding: "0.75rem 1rem", marginBottom: "1rem" }}>
+              <p style={{ margin: "0 0 0.4rem 0", fontSize: "0.78rem", fontWeight: 700, color: "#b7860b", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Due within {DUE_SOON_DAYS} days
+              </p>
+              {dueSoonSubs.map(s => (
+                <p key={s.id} style={{ margin: "0.2rem 0", fontSize: "0.85rem", color: "#2c2c2c" }}>
+                  {s.name} — ${s.cost.toFixed(2)} on {s.next_date}
+                </p>
+              ))}
+            </div>
+          )}
+
           {showSubForm && (
             <div className={styles.form}>
               <h3 className={styles.formTitle}>Add Subscription</h3>
@@ -666,66 +836,72 @@ export default function Finances() {
           {subscriptions.length === 0 && !showSubForm && <p className={styles.empty}>No subscriptions yet.</p>}
 
           <div className={styles.subList}>
-            {subscriptions.map(s => (
-              <div key={s.id} className={styles.subCard}>
-                {editingSub === s.id ? (
-                  <div style={{ flex: 1 }}>
-                    <div className={styles.formGrid}>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label}>Name</label>
-                        <input className={styles.input} value={editingSubForm.name} onChange={e => setEditingSubForm(f => ({ ...f, name: e.target.value }))} />
+            {subscriptions.map(s => {
+              const isDueSoon = dueSoonSubs.some(d => d.id === s.id)
+              return (
+                <div key={s.id} className={styles.subCard} style={isDueSoon ? { borderColor: "#f5c842" } : {}}>
+                  {editingSub === s.id ? (
+                    <div style={{ flex: 1 }}>
+                      <div className={styles.formGrid}>
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>Name</label>
+                          <input className={styles.input} value={editingSubForm.name} onChange={e => setEditingSubForm(f => ({ ...f, name: e.target.value }))} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>Cost</label>
+                          <input className={styles.input} type="number" value={editingSubForm.cost} onChange={e => setEditingSubForm(f => ({ ...f, cost: e.target.value }))} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>Billing Cycle</label>
+                          <select className={styles.input} value={editingSubForm.cycle} onChange={e => setEditingSubForm(f => ({ ...f, cycle: e.target.value }))}>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                          </select>
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>Next Billing Date</label>
+                          <input className={styles.input} type="date" value={editingSubForm.next_date} onChange={e => setEditingSubForm(f => ({ ...f, next_date: e.target.value }))} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>Category</label>
+                          <input className={styles.input} value={editingSubForm.category} onChange={e => setEditingSubForm(f => ({ ...f, category: e.target.value }))} />
+                        </div>
+                        <div className={styles.formGroup}>
+                          <label className={styles.label}>Notes</label>
+                          <input className={styles.input} value={editingSubForm.notes} onChange={e => setEditingSubForm(f => ({ ...f, notes: e.target.value }))} />
+                        </div>
                       </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label}>Cost</label>
-                        <input className={styles.input} type="number" value={editingSubForm.cost} onChange={e => setEditingSubForm(f => ({ ...f, cost: e.target.value }))} />
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label}>Billing Cycle</label>
-                        <select className={styles.input} value={editingSubForm.cycle} onChange={e => setEditingSubForm(f => ({ ...f, cycle: e.target.value }))}>
-                          <option value="monthly">Monthly</option>
-                          <option value="yearly">Yearly</option>
-                        </select>
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label}>Next Billing Date</label>
-                        <input className={styles.input} type="date" value={editingSubForm.next_date} onChange={e => setEditingSubForm(f => ({ ...f, next_date: e.target.value }))} />
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label}>Category</label>
-                        <input className={styles.input} value={editingSubForm.category} onChange={e => setEditingSubForm(f => ({ ...f, category: e.target.value }))} />
-                      </div>
-                      <div className={styles.formGroup}>
-                        <label className={styles.label}>Notes</label>
-                        <input className={styles.input} value={editingSubForm.notes} onChange={e => setEditingSubForm(f => ({ ...f, notes: e.target.value }))} />
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <button className={styles.submitButton} onClick={handleSaveEditSub}>Save</button>
-                      <button className={styles.cancelButton} onClick={() => setEditingSub(null)}>Cancel</button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className={styles.subCardLeft}>
-                      <p className={styles.subName}>{s.name}</p>
-                      <p className={styles.subMeta}>
-                        {s.cycle === "yearly" ? "Yearly" : "Monthly"}{s.category && ` · ${s.category}`}
-                        {s.next_date && ` · Next: ${s.next_date}`}
-                      </p>
-                      {s.notes && <p className={styles.subNotes}>{s.notes}</p>}
-                    </div>
-                    <div style={{ textAlign: "right" }}>
-                      <p className={styles.subCost}>${s.cost.toFixed(2)}/{s.cycle === "yearly" ? "yr" : "mo"}</p>
-                      {s.cycle === "yearly" && <p className={styles.subMonthly}>${(s.cost / 12).toFixed(2)}/mo</p>}
-                      <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end", marginTop: "0.25rem" }}>
-                        <button className={styles.editButton} onClick={() => handleEditSubStart(s)}>Edit</button>
-                        <button className={styles.deleteButton} onClick={() => handleDeleteSub(s.id)}>Remove</button>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <button className={styles.submitButton} onClick={handleSaveEditSub}>Save</button>
+                        <button className={styles.cancelButton} onClick={() => setEditingSub(null)}>Cancel</button>
                       </div>
                     </div>
-                  </>
-                )}
-              </div>
-            ))}
+                  ) : (
+                    <>
+                      <div className={styles.subCardLeft}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          <p className={styles.subName}>{s.name}</p>
+                          {isDueSoon && <span style={{ fontSize: "0.65rem", background: "#fef9e7", border: "1px solid #f5c842", color: "#b7860b", borderRadius: "20px", padding: "0.1rem 0.4rem", fontWeight: 700 }}>Due soon</span>}
+                        </div>
+                        <p className={styles.subMeta}>
+                          {s.cycle === "yearly" ? "Yearly" : "Monthly"}{s.category && ` · ${s.category}`}
+                          {s.next_date && ` · Next: ${s.next_date}`}
+                        </p>
+                        {s.notes && <p className={styles.subNotes}>{s.notes}</p>}
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <p className={styles.subCost}>${s.cost.toFixed(2)}/{s.cycle === "yearly" ? "yr" : "mo"}</p>
+                        {s.cycle === "yearly" && <p className={styles.subMonthly}>${(s.cost / 12).toFixed(2)}/mo</p>}
+                        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end", marginTop: "0.25rem" }}>
+                          <button className={styles.editButton} onClick={() => handleEditSubStart(s)}>Edit</button>
+                          <button className={styles.deleteButton} onClick={() => handleDeleteSub(s.id)}>Remove</button>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </>
       )}
