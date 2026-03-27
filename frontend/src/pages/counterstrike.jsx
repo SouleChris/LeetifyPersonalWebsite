@@ -34,6 +34,9 @@ export default function CS2() {
       dpr: me?.dpr,
       trade_kill: me?.trade_kills_success_percentage,
       counter_strafing: me?.counter_strafing_shots_good_ratio,
+      spray_accuracy: me?.spray_accuracy,
+      ct_leetify_rating: me?.ct_leetify_rating,
+      t_leetify_rating: me?.t_leetify_rating,
     }
   })
 
@@ -51,28 +54,42 @@ export default function CS2() {
       const map = match.map_name
       const mapShort = map.replace("de_", "").replace("cs_", "")
       if (!acc[mapShort]) {
-        acc[mapShort] = { map: mapShort, kd: [], dpr: [], hs_kills: [], trade_kill: [], preaim: [], count: 0 }
+        acc[mapShort] = {
+          map: mapShort,
+          kd: [], dpr: [], hs_kills: [], trade_kill: [], preaim: [],
+          spray_accuracy: [], ct_leetify_rating: [], t_leetify_rating: [],
+          count: 0
+        }
       }
       acc[mapShort].kd.push(me.kd_ratio ?? 0)
       acc[mapShort].dpr.push(me.dpr ?? 0)
       acc[mapShort].hs_kills.push(me.total_hs_kills ?? 0)
       acc[mapShort].trade_kill.push(me.trade_kills_success_percentage ?? 0)
       acc[mapShort].preaim.push(me.preaim ?? 0)
+      acc[mapShort].spray_accuracy.push(me.spray_accuracy ?? 0)
+      acc[mapShort].ct_leetify_rating.push(me.ct_leetify_rating ?? 0)
+      acc[mapShort].t_leetify_rating.push(me.t_leetify_rating ?? 0)
       acc[mapShort].count++
       return acc
     }, {})
-  ).map(m => ({
-    map: m.map,
-    kd: (m.kd.reduce((a, b) => a + b, 0) / m.kd.length).toFixed(2),
-    dpr: (m.dpr.reduce((a, b) => a + b, 0) / m.dpr.length).toFixed(1),
-    hs_kills: (m.hs_kills.reduce((a, b) => a + b, 0) / m.hs_kills.length).toFixed(1),
-    trade_kill: ((m.trade_kill.reduce((a, b) => a + b, 0) / m.trade_kill.length) * 100).toFixed(1),
-    preaim: (m.preaim.reduce((a, b) => a + b, 0) / m.preaim.length).toFixed(1),
-    reaction_time: recentByMap[m.map]
-      ? (recentByMap[m.map].reduce((a, b) => a + b, 0) / recentByMap[m.map].length).toFixed(0)
-      : null,
-    count: m.count
-  })).sort((a, b) => b.count - a.count) : []
+  ).map(m => {
+    const avg = arr => arr.reduce((a, b) => a + b, 0) / arr.length
+    return {
+      map: m.map,
+      kd: avg(m.kd).toFixed(2),
+      dpr: avg(m.dpr).toFixed(1),
+      hs_kills: avg(m.hs_kills).toFixed(1),
+      trade_kill: (avg(m.trade_kill) * 100).toFixed(1),
+      preaim: avg(m.preaim).toFixed(1),
+      spray_accuracy: (avg(m.spray_accuracy) * 100).toFixed(1),
+      ct_leetify_rating: avg(m.ct_leetify_rating).toFixed(4),
+      t_leetify_rating: avg(m.t_leetify_rating).toFixed(4),
+      reaction_time: recentByMap[m.map]
+        ? (recentByMap[m.map].reduce((a, b) => a + b, 0) / recentByMap[m.map].length).toFixed(0)
+        : null,
+      count: m.count
+    }
+  }).sort((a, b) => b.count - a.count) : []
 
   // gets unique maps played and match count for the map grid
   const uniqueMaps = matchesData ? [...new Set(matchesData.map(m => m.map_name))]
@@ -106,9 +123,23 @@ export default function CS2() {
           counter_strafing: me?.counter_strafing_shots_good_ratio != null ? `${(me.counter_strafing_shots_good_ratio * 100).toFixed(1)}%` : "—",
           reaction_time: me?.reaction_time != null ? `${(me.reaction_time * 1000).toFixed(0)}ms` : "—",
           preaim: me?.preaim != null ? `${me.preaim.toFixed(1)}%` : "—",
+          spray_accuracy: me?.spray_accuracy != null ? `${(me.spray_accuracy * 100).toFixed(1)}%` : "—",
+          ct_leetify_rating: me?.ct_leetify_rating?.toFixed(4) ?? "—",
+          t_leetify_rating: me?.t_leetify_rating?.toFixed(4) ?? "—",
         }
       }) ?? []
   }
+
+  // Shared Y-axis domain for CT/T rating charts so both scales match
+  const ctTValues = [
+    ...(myStats?.map(m => m.ct_leetify_rating).filter(v => v != null) ?? []),
+    ...(myStats?.map(m => m.t_leetify_rating).filter(v => v != null) ?? []),
+    ...(mapStats.map(m => parseFloat(m.ct_leetify_rating)).filter(v => !isNaN(v))),
+    ...(mapStats.map(m => parseFloat(m.t_leetify_rating)).filter(v => !isNaN(v))),
+  ]
+  const ctTMin = ctTValues.length ? parseFloat((Math.min(...ctTValues) * 1.1).toFixed(4)) : "auto"
+  const ctTMax = ctTValues.length ? parseFloat((Math.max(...ctTValues) * 1.1).toFixed(4)) : "auto"
+  const ctTDomain = [ctTMin, ctTMax]
 
   if (error) return <div className={styles.container}><p>{error}</p></div>
   if (!data) return <div className={styles.container}><p>Loading...</p></div>
@@ -119,28 +150,34 @@ export default function CS2() {
   const leetifyRating = ranks?.leetify
 
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>My CS2 Stats</h1>
+    <div>
+      {/* Title and nav always pinned to standard container width */}
+      <div className={styles.container} style={{ paddingBottom: 0 }}>
+        <h1 className={styles.title}>My CS2 Stats</h1>
 
-      {/* View Toggle */}
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
-        <button onClick={() => { setView("overview"); setSelectedMap(null) }} className={view === "overview" ? styles.activeButton : styles.button}>
-          Overview
-        </button>
-        <button onClick={() => { setView("recent"); setSelectedMap(null) }} className={view === "recent" ? styles.activeButton : styles.button}>
-          Recent Matches
-        </button>
-        <button onClick={() => { setView("map"); setSelectedMap(null) }} className={view === "map" ? styles.activeButton : styles.button}>
-          Per Map
-        </button>
-        <button onClick={() => { setView("history"); setSelectedMap(null) }} className={view === "history" ? styles.activeButton : styles.button}>
-          Match History
-        </button>
+        {/* View Toggle */}
+        <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
+          <button onClick={() => { setView("overview"); setSelectedMap(null) }} className={view === "overview" ? styles.activeButton : styles.button}>
+            Overview
+          </button>
+          <button onClick={() => { setView("recent"); setSelectedMap(null) }} className={view === "recent" ? styles.activeButton : styles.button}>
+            Recent Matches
+          </button>
+          <button onClick={() => { setView("map"); setSelectedMap(null) }} className={view === "map" ? styles.activeButton : styles.button}>
+            Per Map
+          </button>
+          <button onClick={() => { setView("history"); setSelectedMap(null) }} className={view === "history" ? styles.activeButton : styles.button}>
+            Match History
+          </button>
+        </div>
       </div>
+
+      {/* Content — always wide container so left edge never shifts between views */}
+      <div className={styles.containerWide} style={{ paddingTop: 0 }}>
 
       {/* Overview View */}
       {view === "overview" && (
-        <>
+        <div className={styles.contentConstrained}>
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Overview</h2>
             <div className={styles.grid}>
@@ -188,12 +225,12 @@ export default function CS2() {
               ))}
             </div>
           </section>
-        </>
+        </div>
       )}
 
       {/* Recent Match Charts */}
       {view === "recent" && (
-        <>
+        <div className={styles.contentConstrained}>
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>Reaction Time — Last 30 Matches</h2>
             <div style={{ width: "100%", height: 300 }}>
@@ -367,21 +404,84 @@ export default function CS2() {
               </ResponsiveContainer>
             </div>
           </section>
-        </>
+
+          {/* NEW: Spray Accuracy */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>Spray Accuracy Per Match</h2>
+            <div style={{ width: "100%", height: 300 }}>
+              <ResponsiveContainer>
+                <LineChart data={myStats} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#3a3a3a" />
+                  <XAxis dataKey="game" tick={{ fill: "#a8b8a0" }} />
+                  <YAxis tick={{ fill: "#a8b8a0" }} domain={[0, 1]} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#2c2c2c", border: "1px solid #f5c842", borderRadius: "8px" }}
+                    labelStyle={{ color: "#a8b8a0" }}
+                    formatter={(value) => [`${(value * 100).toFixed(1)}%`, "Spray Accuracy"]}
+                    labelFormatter={(label, payload) => {
+                      const m = payload?.[0]?.payload
+                      return m ? `${m.date} — ${m.map}` : `Match ${label}`
+                    }}
+                  />
+                  <Line type="monotone" dataKey="spray_accuracy" stroke="#e78f5cff" strokeWidth={2} dot={{ fill: "#fc642cff", r: 3 }} activeDot={{ r: 6, fill: "#dd4b02ff" }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+
+          {/* NEW: CT vs T Leetify Rating */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>CT vs T Leetify Rating Per Match</h2>
+            <div style={{ width: "100%", height: 300 }}>
+              <ResponsiveContainer>
+                <LineChart data={myStats} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#3a3a3a" />
+                  <XAxis dataKey="game" tick={{ fill: "#a8b8a0" }} />
+                  <YAxis tick={{ fill: "#a8b8a0" }} domain={ctTDomain} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#2c2c2c", border: "1px solid #f5c842", borderRadius: "8px" }}
+                    labelStyle={{ color: "#a8b8a0" }}
+                    formatter={(value, name) => [value?.toFixed(4), name === "ct_leetify_rating" ? "CT Rating" : "T Rating"]}
+                    labelFormatter={(label, payload) => {
+                      const m = payload?.[0]?.payload
+                      return m ? `${m.date} — ${m.map}` : `Match ${label}`
+                    }}
+                  />
+                  <Line type="monotone" dataKey="ct_leetify_rating" stroke="#6499dbff" strokeWidth={2} dot={{ fill: "#6074c4ff", r: 3 }} activeDot={{ r: 6, fill: "#0c00eaff" }} name="ct_leetify_rating" />
+                  <Line type="monotone" dataKey="t_leetify_rating" stroke="#e78f5cff" strokeWidth={2} dot={{ fill: "#fc642cff", r: 3 }} activeDot={{ r: 6, fill: "#dd4b02ff" }} name="t_leetify_rating" />
+
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div style={{ display: "flex", gap: "1.5rem", marginTop: "0.75rem", fontSize: "0.8rem", color: "#888" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <span style={{ width: 12, height: 3, backgroundColor: "#6499dbff", display: "inline-block", borderRadius: 2 }} />
+                CT Side
+              </span>
+              <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <span style={{ width: 12, height: 3, backgroundColor: "#e78f5cff", display: "inline-block", borderRadius: 2 }} />
+                T Side
+              </span>
+            </div>
+          </section>
+        </div>
       )}
 
       {/* Per Map Charts */}
       {view === "map" && (
-        <section className={styles.section}>
+        <div className={styles.contentConstrained}><section className={styles.section}>
           <h2 className={styles.sectionTitle}>Stats By Map</h2>
           {[
             { key: "kd", label: "K/D Ratio", color: "#429ef5ff" },
             { key: "dpr", label: "Damage Per Round", color: "#ef8624ff" },
             { key: "hs_kills", label: "Avg Headshot Kills", color: "#6499dbff" },
-            { key: "trade_kill", label: "Trade Kill Success %", color: "#ef8624ff"},
-            { key: "preaim", label: "Preaim", color: "#6499dbff"},
+            { key: "trade_kill", label: "Trade Kill Success %", color: "#ef8624ff" },
+            { key: "preaim", label: "Preaim", color: "#6499dbff" },
             { key: "reaction_time", label: "Reaction Time (ms)", color: "#ef8624ff" },
-          ].map(({ key, label, color }) => (
+            { key: "spray_accuracy", label: "Spray Accuracy (%)", color: "#6499dbff" },
+            { key: "ct_leetify_rating", label: "CT Leetify Rating", color: "#429ef5ff", domain: ctTDomain },
+            { key: "t_leetify_rating", label: "T Leetify Rating", color: "#ef8624ff", domain: ctTDomain },
+          ].map(({ key, label, color, domain }) => (
             <div key={key} style={{ marginBottom: "2rem" }}>
               <h3 style={{ color: "#888", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "0.75rem" }}>{label}</h3>
               <div style={{ width: "100%", height: 250 }}>
@@ -389,7 +489,7 @@ export default function CS2() {
                   <ScatterChart margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#eeeeee" />
                     <XAxis dataKey="map" type="category" tick={{ fill: "#888", fontSize: 12 }} allowDuplicatedCategory={false} />
-                    <YAxis dataKey={key} type="number" tick={{ fill: "#888", fontSize: 12 }} domain={["auto", "auto"]} />
+                    <YAxis dataKey={key} type="number" tick={{ fill: "#888", fontSize: 12 }} domain={domain ?? ["auto", "auto"]} />
                     <ZAxis dataKey="count" range={[40, 200]} />
                     <Tooltip
                       contentStyle={{ backgroundColor: "#fff", border: "1px solid #eeeeee", borderRadius: "8px" }}
@@ -406,7 +506,7 @@ export default function CS2() {
               </div>
             </div>
           ))}
-        </section>
+        </section></div>
       )}
 
       {/* Match History View */}
@@ -458,6 +558,9 @@ export default function CS2() {
                       <th className={styles.matchTableTh}>Counter Straf.</th>
                       <th className={styles.matchTableTh}>Reaction</th>
                       <th className={styles.matchTableTh}>Preaim</th>
+                      <th className={styles.matchTableTh}>Spray Acc.</th>
+                      <th className={styles.matchTableTh}>CT Rating</th>
+                      <th className={styles.matchTableTh}>T Rating</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -479,6 +582,9 @@ export default function CS2() {
                         <td className={styles.matchTableTd}>{match.counter_strafing}</td>
                         <td className={styles.matchTableTd}>{match.reaction_time}</td>
                         <td className={styles.matchTableTd}>{match.preaim}</td>
+                        <td className={styles.matchTableTd}>{match.spray_accuracy}</td>
+                        <td className={styles.matchTableTd}>{match.ct_leetify_rating}</td>
+                        <td className={styles.matchTableTd}>{match.t_leetify_rating}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -489,6 +595,7 @@ export default function CS2() {
         </>
       )}
 
+      </div>
     </div>
   )
 }

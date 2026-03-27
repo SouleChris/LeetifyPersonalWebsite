@@ -5,6 +5,18 @@
   margin: 0 auto;
 }
 
+.containerWide {
+  padding: 3rem 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Constrains content on non-history views to match nav width */
+.contentConstrained {
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
 .title {
   font-size: 2rem;
   font-weight: 700;
@@ -244,4 +256,8 @@
 .resultTie {
   color: #888;
   font-weight: 700;
+}
+
+html {
+  overflow-y: scroll;
 }
