@@ -22,7 +22,49 @@ const EMPTY_WORKOUT_FORM = {
 
 const EMPTY_EXERCISE = { name: "", sets: "", reps: "", weight: "" }
 
-const CALORIE_RATES = { Run: 10, Lift: 6, Hike: 7, Other: 5 }
+// User stats for calorie calculation
+const WEIGHT_KG = 77.1  // 170 lbs
+const HEIGHT_CM = 177.8 // 5'10"
+const AGE = 23
+
+const getMET = (type, form) => {
+  if (type === "Run") {
+    const pace = form.pace ? parseFloat(form.pace.split(":")[0]) + parseFloat(form.pace.split(":")[1] || 0) / 60 : null
+    if (pace) {
+      if (pace < 5.0) return 19.0   // sub 5:00
+      if (pace < 5.5) return 17.5   // 5:00-5:30
+      if (pace < 6.0) return 16.0   // 5:30-6:00
+      if (pace < 6.5) return 14.5   // 6:00-6:30
+      if (pace < 7.0) return 13.5   // 6:30-7:00
+      if (pace < 7.5) return 12.5   // 7:00-7:30
+      if (pace < 8.0) return 11.5   // 7:30-8:00
+      if (pace < 8.5) return 11.0   // 8:00-8:30
+      if (pace < 9.0) return 10.5   // 8:30-9:00
+      if (pace < 9.5) return 9.8    // 9:00-9:30
+      if (pace < 10.0) return 9.0   // 9:30-10:00
+      if (pace < 11.0) return 8.3   // 10:00-11:00
+      if (pace < 12.0) return 7.5   // 11:00-12:00
+      return 6.0                     // 12+ min/mile
+    }
+    if (form.distance) return 9.8
+    return 8.0
+  }
+  if (type === "Lift") {
+    const duration = parseInt(form.duration) || 0
+    if (duration > 75) return 6.0  // long heavy session
+    if (duration > 45) return 5.0  // moderate session
+    return 3.5                      // shorter/lighter session
+  }
+  if (type === "Hike") return 6.0  // moderate hiking MET
+  return 4.5                        // general moderate exercise
+}
+
+const calcCalories = (type, form) => {
+  const duration = parseInt(form.duration) || 0
+  if (!duration) return 0
+  const met = getMET(type, form)
+  return Math.round(met * WEIGHT_KG * (duration / 60))
+}
 
 const FOOD_DATA = {
   Run: {
@@ -115,13 +157,7 @@ export default function Workout() {
           return
         }
         const data = await res.json()
-        const parsed = (Array.isArray(data) ? data : []).map(w => ({
-          ...w,
-          muscle_groups: typeof w.muscle_groups === "string"
-            ? JSON.parse(w.muscle_groups)
-            : (w.muscle_groups ?? [])
-        }))
-        setWorkouts(parsed)
+        setWorkouts(Array.isArray(data) ? data : [])
       } catch {
         setError("Failed to load workouts")
       } finally {
@@ -142,14 +178,13 @@ export default function Workout() {
 
   const handleAddWorkout = async () => {
     if (!workoutForm.type || !workoutForm.date) return
-    const estCalories = workoutForm.calories ||
-      Math.round((parseInt(workoutForm.duration) || 0) * CALORIE_RATES[workoutForm.type])
+    setError(null) // clear any previous error
+    const estCalories = workoutForm.calories || calcCalories(workoutForm.type, workoutForm)
     const newWorkout = {
       id: Date.now().toString(),
       ...workoutForm,
       calories: estCalories,
       source: "manual",
-      // Convert empty strings to null for numeric fields
       duration: workoutForm.duration === "" ? null : workoutForm.duration,
       distance: workoutForm.distance === "" ? null : workoutForm.distance,
       pace: workoutForm.pace === "" ? null : workoutForm.pace,
@@ -167,14 +202,7 @@ export default function Workout() {
         return
       }
       const saved = await res.json()
-      // Parse muscle_groups back to array for local state
-      const savedParsed = {
-        ...saved,
-        muscle_groups: typeof saved.muscle_groups === "string"
-          ? JSON.parse(saved.muscle_groups)
-          : (saved.muscle_groups ?? [])
-      }
-      setWorkouts(prev => [savedParsed, ...prev])
+      setWorkouts(prev => [saved, ...prev])
 
       if (exercises_form.length > 0) {
         const savedExercises = []
@@ -186,6 +214,11 @@ export default function Workout() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newEx)
           })
+          if (!exRes.ok) {
+            const exErr = await exRes.json()
+            console.error("Failed to save exercise:", exErr)
+            continue
+          }
           const savedEx = await exRes.json()
           savedExercises.push(savedEx)
         }
@@ -203,8 +236,8 @@ export default function Workout() {
 
   const handleEditWorkout = async () => {
     if (!workoutForm.type || !workoutForm.date) return
-    const estCalories = workoutForm.calories ||
-      Math.round((parseInt(workoutForm.duration) || 0) * CALORIE_RATES[workoutForm.type])
+    setError(null) // clear any previous error
+    const estCalories = workoutForm.calories || calcCalories(workoutForm.type, workoutForm)
     const updated = {
       ...workoutForm,
       calories: estCalories,
@@ -213,18 +246,18 @@ export default function Workout() {
       pace: workoutForm.pace === "" ? null : workoutForm.pace,
     }
     try {
-      await fetch(`/workouts/${editingWorkout}`, {
+      const res = await fetch(`/workouts/${editingWorkout}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated)
       })
-      const updatedParsed = {
-        ...updated,
-        muscle_groups: typeof updated.muscle_groups === "string"
-          ? JSON.parse(updated.muscle_groups)
-          : (updated.muscle_groups ?? [])
+      if (!res.ok) {
+        const err = await res.json()
+        console.error("Update failed:", err)
+        setError("Failed to update workout: " + (err.error || "unknown"))
+        return
       }
-      setWorkouts(prev => prev.map(w => w.id === editingWorkout ? { ...w, ...updatedParsed } : w))
+      setWorkouts(prev => prev.map(w => w.id === editingWorkout ? { ...w, ...updated } : w))
       setEditingWorkout(null)
       setWorkoutForm(EMPTY_WORKOUT_FORM)
       setShowForm(false)
@@ -235,9 +268,16 @@ export default function Workout() {
   }
 
   const handleDeleteWorkout = async (id) => {
+    setError(null) // clear any previous error
     try {
-      await fetch(`/workouts/${id}`, { method: "DELETE" })
+      const res = await fetch(`/workouts/${id}`, { method: "DELETE" })
+      if (!res.ok) {
+        const err = await res.json()
+        setError("Failed to delete workout: " + (err.error || "unknown"))
+        return
+      }
       setWorkouts(prev => prev.filter(w => w.id !== id))
+      setExercises(prev => { const next = { ...prev }; delete next[id]; return next })
       setSelectedWorkout(null)
       setSelectedDate(null)
     } catch {
@@ -472,11 +512,11 @@ export default function Workout() {
                   >
                     <span className={styles.calendarDayNum}>{day.day}</span>
                     <div className={styles.calendarDots}>
-                    {dayWorkouts.slice(0, 2).map((w, j) => (
+                      {dayWorkouts.slice(0, 2).map((w, j) => (
                         <span key={j} className={styles.calendarIcon}>
-                        {w.type === "Run" ? "🏃" : w.type === "Lift" ? "🏋️" : w.type === "Hike" ? "🥾" : "⚡"}
+                          {w.type === "Run" ? "🏃" : w.type === "Lift" ? "🏋️" : w.type === "Hike" ? "🥾" : "⚡"}
                         </span>
-                    ))}
+                      ))}
                     </div>
                   </div>
                 )
@@ -484,10 +524,10 @@ export default function Workout() {
             </div>
 
             <div className={styles.calendarLegend}>
-                <span className={styles.legendItem}>🏃 Run</span>
-                <span className={styles.legendItem}>🏋️ Lift</span>
-                <span className={styles.legendItem}>🥾 Hike</span>
-                <span className={styles.legendItem}>⚡ Other</span>
+              <span className={styles.legendItem}>🏃 Run</span>
+              <span className={styles.legendItem}>🏋️ Lift</span>
+              <span className={styles.legendItem}>🥾 Hike</span>
+              <span className={styles.legendItem}>⚡ Other</span>
             </div>
           </div>
 
@@ -726,8 +766,7 @@ function WorkoutForm({ form, setForm, exercises_form, setExercisesForm, onSave, 
     setExercisesForm(prev => prev.map(ex => ex.id === id ? { ...ex, [field]: value } : ex))
   }
 
-  const estimatedCalories = form.calories ||
-    Math.round((parseInt(form.duration) || 0) * CALORIE_RATES[form.type])
+  const estimatedCalories = form.calories || calcCalories(form.type, form)
 
   return (
     <div className={styles.form}>
