@@ -20,7 +20,7 @@
 .title {
   font-size: 2rem;
   font-weight: 700;
-  color: #2c2c2c;
+  color: var(--text-primary);
   margin-bottom: 0.25rem;
   letter-spacing: -0.5px;
 }
@@ -34,8 +34,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: #888;
-  border-bottom: 1px solid #e8e8e8;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 0.75rem;
   margin-bottom: 1.5rem;
 }
@@ -53,8 +53,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f9f9f9;
-  border: 1px solid #eeeeee;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -64,7 +64,7 @@
 }
 
 .cardLabel {
-  color: #888;
+  color: var(--text-muted);
   font-size: 0.8rem;
   font-weight: 500;
 }
@@ -72,33 +72,33 @@
 .cardValue {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #2c2c2c;
+  color: var(--text-primary);
 }
 
 /* ── Color Tiers ── */
 .excellent {
-  background-color: #f0f7f0;
-  border-color: #a8b8a0;
+  background-color: var(--excellent-bg);
+  border-color: var(--excellent-border);
 }
-.excellent .cardValue { color: #4a7c4e; }
+.excellent .cardValue { color: var(--excellent-text); }
 
 .good {
-  background-color: #f7f9f0;
-  border-color: #c8d48a;
+  background-color: var(--good-bg);
+  border-color: var(--good-border);
 }
-.good .cardValue { color: #6a8a2e; }
+.good .cardValue { color: var(--good-text); }
 
 .average {
-  background-color: #fdf8e8;
-  border-color: #f5c842;
+  background-color: var(--average-bg);
+  border-color: var(--average-border);
 }
-.average .cardValue { color: #b8922a; }
+.average .cardValue { color: var(--average-text); }
 
 .poor {
-  background-color: #fdf0f0;
-  border-color: #e57373;
+  background-color: var(--poor-bg);
+  border-color: var(--poor-border);
 }
-.poor .cardValue { color: #c0392b; }
+.poor .cardValue { color: var(--poor-text); }
 
 /* ── Recent Matches ── */
 .matches {
@@ -108,10 +108,10 @@
 }
 
 .matchCard {
-  background-color: #f9f9f9;
+  background-color: var(--card-bg);
   border-radius: 10px;
   padding: 1.25rem;
-  border: 1px solid #eeeeee;
+  border: 1px solid var(--border);
   border-top: 3px solid transparent;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -121,11 +121,11 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.win { border-top-color: #a8b8a0; }
-.loss { border-top-color: #e57373; }
+.win { border-top-color: var(--win-border); }
+.loss { border-top-color: var(--loss-border); }
 
 .matchMap {
-  color: #2c2c2c;
+  color: var(--text-primary);
   font-weight: 700;
   font-size: 0.95rem;
   margin-bottom: 0.4rem;
@@ -139,11 +139,11 @@
   margin-bottom: 0.75rem;
 }
 
-.win .matchOutcome { color: #4a7c4e; }
-.loss .matchOutcome { color: #c0392b; }
+.win .matchOutcome { color: var(--win-text); }
+.loss .matchOutcome { color: var(--loss-text); }
 
 .matchStat {
-  color: #888;
+  color: var(--text-muted);
   font-size: 0.8rem;
   margin-bottom: 0.2rem;
 }
@@ -151,9 +151,9 @@
 .button {
   padding: 0.6rem 1.5rem;
   border-radius: 8px;
-  border: 1px solid #eeeeee;
-  background-color: #f9f9f9;
-  color: #888;
+  border: 1px solid var(--border);
+  background-color: var(--card-bg);
+  color: var(--text-muted);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -161,11 +161,10 @@
 }
 
 .button:hover {
-  background-color: #f0f0f0;
-  color: #2c2c2c;
+  background-color: var(--bg-subtle);
+  color: var(--text-primary);
 }
 
-/* Button color on top under my cs2 stats */
 .activeButton {
   padding: 0.6rem 1.5rem;
   border-radius: 8px;
@@ -184,8 +183,8 @@
 }
 
 .mapCard {
-  background: #f9f9f9;
-  border: 1px solid #eeeeee;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1.5rem 1rem;
   text-align: center;
@@ -193,9 +192,8 @@
   transition: all 0.15s ease;
 }
 
-/* Maps on select map cards in the match history tab*/
 .mapCard:hover {
-  background: #eef6fb;
+  background: var(--bg-subtle);
   border-color: #255bac;
   transform: translateY(-2px);
 }
@@ -203,14 +201,14 @@
 .mapName {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #2c2c2c;
+  color: var(--text-primary);
   text-transform: capitalize;
   margin-bottom: 0.4rem;
 }
 
 .mapCount {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -224,40 +222,75 @@
 .matchTableTh {
   padding: 0.6rem 1rem;
   text-align: left;
-  color: #888;
+  color: var(--text-muted);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid #eeeeee;
+  border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
 .matchTableTd {
   padding: 0.6rem 1rem;
-  color: #2c2c2c;
-  border-bottom: 1px solid #f5f5f5;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 
 .matchTableRow:hover td {
-  background-color: #f9f9f9;
+  background-color: var(--bg-subtle);
 }
 
 .resultWin {
-  color: #4a7c4e;
+  color: var(--win-text);
   font-weight: 700;
 }
 
 .resultLoss {
-  color: #e57373;
+  color: var(--loss-text);
   font-weight: 700;
 }
 
 .resultTie {
-  color: #888;
+  color: var(--text-muted);
   font-weight: 700;
 }
 
-html {
-  overflow-y: scroll;
+/* ── History mode slider toggle ── */
+.sliderToggle {
+  width: 56px;
+  height: 28px;
+  border-radius: 999px;
+  background-color: var(--border);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.25s ease;
+  flex-shrink: 0;
+}
+
+.sliderToggleRight {
+  background-color: #215fbc;
+}
+
+.sliderThumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.25s ease;
+  display: block;
+}
+
+.sliderToggleRight .sliderThumb {
+  transform: translateX(28px);
+}
+
+.toggleLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
 }

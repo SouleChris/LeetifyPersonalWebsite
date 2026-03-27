@@ -8,6 +8,7 @@ export default function CS2() {
   const [matchesData, setMatchesData] = useState(null)
   const [view, setView] = useState("overview")
   const [selectedMap, setSelectedMap] = useState(null)
+  const [historyMode, setHistoryMode] = useState("all") // "byMap" | "all"
 
   useEffect(() => {
     fetch("/leetify/matches")
@@ -129,6 +130,33 @@ export default function CS2() {
         }
       }) ?? []
   }
+
+  // All matches across every map for the "All" history mode
+  const allMatches = matchesData ? matchesData.map(match => {
+    const me = match.stats?.find(p => p.steam64_id === import.meta.env.VITE_STEAM_ID)
+    const myTeam = me?.initial_team_number
+    const myScore = match.team_scores?.find(t => t.team_number === myTeam)?.score ?? 0
+    const oppScore = match.team_scores?.find(t => t.team_number !== myTeam)?.score ?? 0
+    return {
+      id: match.id,
+      date: new Date(match.finished_at).toLocaleDateString(),
+      map: match.map_name?.replace("de_", "").replace("cs_", ""),
+      result: myScore > oppScore ? "W" : myScore < oppScore ? "L" : "T",
+      score: `${myScore} - ${oppScore}`,
+      kills: me?.total_kills ?? "—",
+      deaths: me?.total_deaths ?? "—",
+      kd: me?.kd_ratio?.toFixed(2) ?? "—",
+      dpr: me?.dpr?.toFixed(1) ?? "—",
+      hs_kills: me?.total_hs_kills ?? "—",
+      trade_kill: me?.trade_kills_success_percentage != null ? `${(me.trade_kills_success_percentage * 100).toFixed(1)}%` : "—",
+      counter_strafing: me?.counter_strafing_shots_good_ratio != null ? `${(me.counter_strafing_shots_good_ratio * 100).toFixed(1)}%` : "—",
+      reaction_time: me?.reaction_time != null ? `${(me.reaction_time * 1000).toFixed(0)}ms` : "—",
+      preaim: me?.preaim != null ? `${me.preaim.toFixed(1)}%` : "—",
+      spray_accuracy: me?.spray_accuracy != null ? `${(me.spray_accuracy * 100).toFixed(1)}%` : "—",
+      ct_leetify_rating: me?.ct_leetify_rating?.toFixed(4) ?? "—",
+      t_leetify_rating: me?.t_leetify_rating?.toFixed(4) ?? "—",
+    }
+  }) : []
 
   // Shared Y-axis domain for CT/T rating charts so both scales match
   const ctTValues = [
@@ -512,41 +540,109 @@ export default function CS2() {
       {/* Match History View */}
       {view === "history" && (
         <>
-          {/* Map Grid — shown when no map is selected */}
-          {!selectedMap && (
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Select a Map</h2>
-              <div className={styles.mapGrid}>
-                {uniqueMaps.map(({ mapName, mapShort, count }) => (
-                  <div
-                    key={mapName}
-                    className={styles.mapCard}
-                    onClick={() => setSelectedMap(mapName)}
-                  >
-                    <div className={styles.mapName}>{mapShort}</div>
-                    <div className={styles.mapCount}>{count} matches</div>
+          {/* Slider toggle */}
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
+            <span className={styles.toggleLabel} style={{ color: historyMode === "all" ? "var(--text-primary)" : "var(--text-muted)" }}>By Map</span>
+            <button
+              className={`${styles.sliderToggle} ${historyMode === "byMap" ? styles.sliderToggleRight : ""}`}
+              onClick={() => { setHistoryMode(prev => prev === "byMap" ? "all" : "byMap"); setSelectedMap(null) }}
+              aria-label="Toggle history mode"
+            >
+              <span className={styles.sliderThumb} />
+            </button>
+            <span className={styles.toggleLabel} style={{ color: historyMode === "all" ? "var(--text-primary)" : "var(--text-muted)" }}>All Matches</span>
+          </div>
+
+          {/* By Map mode */}
+          {historyMode === "byMap" && (
+            <>
+              {!selectedMap && (
+                <section className={styles.section}>
+                  <h2 className={styles.sectionTitle}>Select a Map</h2>
+                  <div className={styles.mapGrid}>
+                    {uniqueMaps.map(({ mapName, mapShort, count }) => (
+                      <div
+                        key={mapName}
+                        className={styles.mapCard}
+                        onClick={() => setSelectedMap(mapName)}
+                      >
+                        <div className={styles.mapName}>{mapShort}</div>
+                        <div className={styles.mapCount}>{count} matches</div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </section>
+                </section>
+              )}
+
+              {selectedMap && (
+                <section className={styles.section}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
+                    <button className={styles.button} onClick={() => setSelectedMap(null)}>← Back</button>
+                    <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
+                      {selectedMap.replace("de_", "").replace("cs_", "")} — {getMatchesForMap(selectedMap).length} Matches
+                    </h2>
+                  </div>
+                  <div style={{ overflowX: "auto" }}>
+                    <table className={styles.matchTable}>
+                      <thead>
+                        <tr>
+                          <th className={styles.matchTableTh}>Date</th>
+                          <th className={styles.matchTableTh}>Result</th>
+                          <th className={styles.matchTableTh}>Score</th>
+                          <th className={styles.matchTableTh}>Kills</th>
+                          <th className={styles.matchTableTh}>Deaths</th>
+                          <th className={styles.matchTableTh}>K/D</th>
+                          <th className={styles.matchTableTh}>DPR</th>
+                          <th className={styles.matchTableTh}>HS Kills</th>
+                          <th className={styles.matchTableTh}>Trade Kill</th>
+                          <th className={styles.matchTableTh}>Counter Straf.</th>
+                          <th className={styles.matchTableTh}>Reaction</th>
+                          <th className={styles.matchTableTh}>Preaim</th>
+                          <th className={styles.matchTableTh}>Spray Acc.</th>
+                          <th className={styles.matchTableTh}>CT Rating</th>
+                          <th className={styles.matchTableTh}>T Rating</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getMatchesForMap(selectedMap).map((match) => (
+                          <tr key={match.id} className={styles.matchTableRow}>
+                            <td className={styles.matchTableTd}>{match.date}</td>
+                            <td className={styles.matchTableTd}>
+                              <span className={match.result === "W" ? styles.resultWin : match.result === "L" ? styles.resultLoss : styles.resultTie}>{match.result}</span>
+                            </td>
+                            <td className={styles.matchTableTd}>{match.score}</td>
+                            <td className={styles.matchTableTd}>{match.kills}</td>
+                            <td className={styles.matchTableTd}>{match.deaths}</td>
+                            <td className={styles.matchTableTd}>{match.kd}</td>
+                            <td className={styles.matchTableTd}>{match.dpr}</td>
+                            <td className={styles.matchTableTd}>{match.hs_kills}</td>
+                            <td className={styles.matchTableTd}>{match.trade_kill}</td>
+                            <td className={styles.matchTableTd}>{match.counter_strafing}</td>
+                            <td className={styles.matchTableTd}>{match.reaction_time}</td>
+                            <td className={styles.matchTableTd}>{match.preaim}</td>
+                            <td className={styles.matchTableTd}>{match.spray_accuracy}</td>
+                            <td className={styles.matchTableTd}>{match.ct_leetify_rating}</td>
+                            <td className={styles.matchTableTd}>{match.t_leetify_rating}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              )}
+            </>
           )}
 
-          {/* Match Table — shown when a map is selected */}
-          {selectedMap && (
+          {/* All Matches mode */}
+          {historyMode === "all" && (
             <section className={styles.section}>
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
-                <button className={styles.button} onClick={() => setSelectedMap(null)}>
-                  ← Back
-                </button>
-                <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
-                  {selectedMap.replace("de_", "").replace("cs_", "")} — {getMatchesForMap(selectedMap).length} Matches
-                </h2>
-              </div>
+              <h2 className={styles.sectionTitle}>All Matches — {allMatches.length} Total</h2>
               <div style={{ overflowX: "auto" }}>
                 <table className={styles.matchTable}>
                   <thead>
                     <tr>
                       <th className={styles.matchTableTh}>Date</th>
+                      <th className={styles.matchTableTh}>Map</th>
                       <th className={styles.matchTableTh}>Result</th>
                       <th className={styles.matchTableTh}>Score</th>
                       <th className={styles.matchTableTh}>Kills</th>
@@ -564,13 +660,12 @@ export default function CS2() {
                     </tr>
                   </thead>
                   <tbody>
-                    {getMatchesForMap(selectedMap).map((match) => (
+                    {allMatches.map((match) => (
                       <tr key={match.id} className={styles.matchTableRow}>
                         <td className={styles.matchTableTd}>{match.date}</td>
+                        <td className={styles.matchTableTd} style={{ textTransform: "capitalize" }}>{match.map}</td>
                         <td className={styles.matchTableTd}>
-                          <span className={match.result === "W" ? styles.resultWin : match.result === "L" ? styles.resultLoss : styles.resultTie}>
-                            {match.result}
-                          </span>
+                          <span className={match.result === "W" ? styles.resultWin : match.result === "L" ? styles.resultLoss : styles.resultTie}>{match.result}</span>
                         </td>
                         <td className={styles.matchTableTd}>{match.score}</td>
                         <td className={styles.matchTableTd}>{match.kills}</td>
